@@ -22,12 +22,15 @@ app.get('/scrape', function (req, res) {
     });
 });
 
-function getPlayer(playerId) {
+function getPlayer(playerId, res) {
     let url = BASE_PLAYER_URL + playerId;
 
     request(url, function (error, response, html) {
         if (!error) {
-            parsePlayer(html);
+            let player = parsePlayer(html);
+            res.send(player);
+        } else {
+            res.send('Get error for player with id: ' + playerId);
         }
     });
 }
@@ -44,6 +47,8 @@ function parsePlayer(html) {
     });
 
     console.log(player);
+
+    return player;
 }
 
 app.listen("8081");
