@@ -1,0 +1,29 @@
+{
+  "name": "scraper",
+  "version": "1.0.0",
+  "description": "Scrape player info",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/phieudu241/scraper.git"
+  },
+  "keywords": [
+    "scraper"
+  ],
+  "author": "dungle",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/phieudu241/scraper/issues"
+  },
+  "homepage": "https://github.com/phieudu241/scraper#readme",
+  "dependencies": {
+    "express": "latest",
+	  "cheerio": "latest",
+    "express": "latest",
+    "firebase": "latest",
+    "request": "latest"
+  }
+}
