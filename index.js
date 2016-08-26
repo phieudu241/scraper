@@ -45,6 +45,8 @@ var PLAYER_ATTRIBUTES = [
     "gkpositioning"
 ];
 
+app.set('port', (process.env.PORT || 5000));
+
 app.get('/test', function (req, res) {
     res.send('Hello');
 });
@@ -201,5 +203,6 @@ function parsePlayer(html, playerId) {
     return player;
 }
 
-app.listen("8081");
-console.log("Magic happens on port 8081");
+app.listen(app.get('port'), function() {
+    console.log('Node app is running on port', app.get('port'));
+});
