@@ -45,7 +45,7 @@ var PLAYER_ATTRIBUTES = [
     "gkpositioning"
 ];
 
-app.get('/', function (req, res) {
+app.get('/test', function (req, res) {
     res.send('Hello');
 });
 
