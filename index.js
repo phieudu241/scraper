@@ -45,10 +45,32 @@ var PLAYER_ATTRIBUTES = [
     "gkpositioning"
 ];
 
+firebase.initializeApp({
+    databaseURL: "https://project-6941809469027540633.firebaseio.com",
+    serviceAccount: "ffo3-098c2203d502.json",
+    databaseAuthVariableOverride: {
+        uid: "fxOWhxsFo6dDrnhbDzNww3sknZf2"
+    }
+});
+
 app.set('port', (process.env.PORT || 5000));
 
 app.get('/test', function (req, res) {
     res.send('Hello');
+});
+
+app.get('/players/:id', function (req, res) {
+    // Get a database reference to our posts
+    var db = firebase.database();
+    var ref = db.ref(req.params.id);
+
+    // Attach an asynchronous callback to read the data at our posts reference
+    ref.on("value", function(snapshot) {
+        console.log(snapshot.val());
+        res.send(snapshot.val());
+    }, function (errorObject) {
+        console.log("The read failed: " + errorObject.code);
+    });
 });
 
 app.get('/scrape', function (req, res) {
@@ -56,14 +78,6 @@ app.get('/scrape', function (req, res) {
     //   if (err) throw err;
     //   console.log(data);
     // });
-    firebase.initializeApp({
-        databaseURL: "https://project-6941809469027540633.firebaseio.com",
-        serviceAccount: "ffo3-098c2203d502.json",
-        databaseAuthVariableOverride: {
-            uid: "fxOWhxsFo6dDrnhbDzNww3sknZf2"
-        }
-    });
-
     var db = firebase.database();
     var rootRef = db.ref();
 
