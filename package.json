@@ -24,7 +24,6 @@
     "express": "latest",
     "cheerio": "latest",
     "express": "latest",
-    "firebase": "latest",
     "request": "latest"
   }
 }

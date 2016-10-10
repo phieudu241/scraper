@@ -8,6 +8,7 @@ var LANGUAGE_MAPPING = require('./multi-language-mapping');
 var app = express();
 
 var BASE_PLAYER_URL = "http://en.fifaaddict.com/fo3player.php?id=";
+var SEARCH_BY_SEASON_URL = "http://en.fifaaddict.com/fo3db.php?q=player&season=";
 
 var PLAYER_ATTRIBUTES = [
     "overallrating",
@@ -58,6 +59,57 @@ app.get('/scrape', function (req, res) {
     getPlayer(playerIds, startIndex, res, fs);
 });
 
+app.get('/getPlayerIdsBySeason/:season', function (req, res) {
+    getPlayerIds(req.params.season);
+});
+
+
+function getPlayerIds(season) {
+
+    let url = SEARCH_BY_SEASON_URL + season;
+
+    request(url, function (error, response, html) {
+        if (!error) {
+            let playerIds = parsePlayerIds(html);
+
+            if (playerIds && playerIds.length) {
+                writeIdsFile(playerIds, season);
+            }
+
+        } else {
+            console.log('Get error for search with season: ' + season);
+            res.send('Error');
+        }
+    });
+}
+
+function writeIdsFile(playerIds, filename) {
+    for (var i = playerIds.length - 1; i >= 0; i--) {
+        console.log(playerIds[i]);
+        fs.appendFileSync("./" + filename +".txt", playerIds[i] + "\r\n");
+    }
+}
+
+function parsePlayerIds(html) {
+    let $ = cheerio.load(html);
+    let playerIds = [];
+    let prefix = 'player_id';
+    let prefixLength = prefix.length;
+
+    $('#fo3-search-result .playerlistable tr').each(function (i, el) {
+        let $el = $(el);
+        let id = $el.attr('id');
+
+        
+        if (id.indexOf(prefix) == 0) {
+            playerIds.push(substring(prefixLength));
+        }
+    });
+
+    return playerIds;
+}
+
+
 function getPlayer(playerIds, index, res, fs) {
     let playerId = playerIds[index];
 
@@ -76,7 +128,7 @@ function getPlayer(playerIds, index, res, fs) {
             }
 
         } else {
-            next(' - Error', playerId, playerIds, index, res, rootRef, fs);
+            next(' - Error', playerId, playerIds, index, res, fs);
 
             console.log('Get error for player with id: ' + playerId);
             res.send('Error');
@@ -120,11 +172,11 @@ function parsePlayer(html, playerId) {
         });
 
         // Localize perfcon attr
-        player['perfcon_vn'] = getLanguageMapping(LANGUAGE_MAPPING.PERF_CON, [player['perfcon']], 'vn');
-        player['perfcon_cn'] = getLanguageMapping(LANGUAGE_MAPPING.PERF_CON, [player['perfcon']], 'cn');
-        player['perfcon_id'] = getLanguageMapping(LANGUAGE_MAPPING.PERF_CON, [player['perfcon']], 'id');
-        player['perfcon_kr'] = getLanguageMapping(LANGUAGE_MAPPING.PERF_CON, [player['perfcon']], 'kr');
-        player['perfcon_th'] = getLanguageMapping(LANGUAGE_MAPPING.PERF_CON, [player['perfcon']], 'th');
+        player['perfcon_vn'] = getLanguageMapping(LANGUAGE_MAPPING.PERF_CON, player['perfcon'], 'vn');
+        player['perfcon_cn'] = getLanguageMapping(LANGUAGE_MAPPING.PERF_CON, player['perfcon'], 'cn');
+        player['perfcon_id'] = getLanguageMapping(LANGUAGE_MAPPING.PERF_CON, player['perfcon'], 'id');
+        player['perfcon_kr'] = getLanguageMapping(LANGUAGE_MAPPING.PERF_CON, player['perfcon'], 'kr');
+        player['perfcon_th'] = getLanguageMapping(LANGUAGE_MAPPING.PERF_CON, player['perfcon'], 'th');
 
         let $f3playerTopInfo = $('.f3player_topinfo');
         let $nameEl = $f3playerTopInfo.find('.player_info_list.player_name a');
@@ -188,17 +240,37 @@ function parsePlayer(html, playerId) {
 
         //speciality
         let speciality = [];
+        let speciality_vn = [];
+        let speciality_cn = [];
+        let speciality_kr = [];
         $playerStatInner.find('.speciality b').each(function (i, el) {
-            speciality.push($(el).text());
+            let value = $(el).text().trim();
+            speciality.push(value);
+            speciality_vn.push(getLanguageMapping(LANGUAGE_MAPPING.SPECIALITIES, value, 'vn'));
+            speciality_cn.push(getLanguageMapping(LANGUAGE_MAPPING.SPECIALITIES, value, 'cn'));
+            speciality_kr.push(getLanguageMapping(LANGUAGE_MAPPING.SPECIALITIES, value, 'kr'));
         });
         player['speciality'] = speciality;
+        player['speciality_vn'] = speciality_vn;
+        player['speciality_cn'] = speciality_cn;
+        player['speciality_kr'] = speciality_kr;
 
         //trait
         let hiddenScore = [];
+        let hiddenScore_vn = [];
+        let hiddenScore_cn = [];
+        let hiddenScore_kr = [];
         $($playerStatInner.find('.trait.sm')[1]).find('b').each(function (i, el) {
-            hiddenScore.push($(el).text());
+            let hiddenAttr = $(el).text().trim();
+            hiddenScore.push(hiddenAttr);
+            hiddenScore_vn.push(getLanguageMapping(LANGUAGE_MAPPING.HIDDEN_STATS, hiddenAttr, 'vn'));
+            hiddenScore_cn.push(getLanguageMapping(LANGUAGE_MAPPING.HIDDEN_STATS, hiddenAttr, 'cn'));
+            hiddenScore_kr.push(getLanguageMapping(LANGUAGE_MAPPING.HIDDEN_STATS, hiddenAttr, 'kr'));
         });
         player['hidden_score'] = hiddenScore;
+        player['hidden_score_vn'] = hiddenScore_vn;
+        player['hidden_score_cn'] = hiddenScore_cn;
+        player['hidden_score_kr'] = hiddenScore_kr;
     } else {
         player = undefined;
     }

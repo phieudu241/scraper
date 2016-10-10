@@ -40,212 +40,152 @@ module.exports = Object.freeze({
         'Celebrity': {
             'vn': 'Ngôi sao được yêu thích',
             'cn': '明星球员',
-            'id': 'a',
-            'kr': '인기인',
-            'th': 'a'
+            'kr': '인기인'
         },
         'Desire to win': {
             'vn': 'Nỗ lực đến cùng',
             'cn': '求胜欲',
-            'id': 'a',
-            'kr': '승부욕',
-            'th': 'a'
+            'kr': '승부욕'
         },
         'Diver': {
             'vn': 'Ăn vạ',
             'cn': '假摔',
-            'id': 'a',
-            'kr': '다이버',
-            'th': 'a'
+            'kr': '다이버'
         },
         'Fantastic clear': {
             'vn': 'Siêu cản phá',
             'cn': '华丽的防御',
-            'id': 'a',
-            'kr': '화려한 걷어내기',
-            'th': 'a'
+            'kr': '화려한 걷어내기'
         },
         'GK Assist in Offense (AI)': {
             'vn': 'Lao lên tham gia phạt góc (AI)',
             'cn': 'GK 参与进攻 (AI)',
-            'id': 'a',
-            'kr': 'GK 공격 가담 (AI)',
-            'th': 'a'
+            'kr': 'GK 공격 가담 (AI)'
         },
         'GK Long Throw': {
             'vn': 'Thủ môn ném xa',
             'cn': 'GK 大力手抛球',
-            'id': 'a',
-            'kr': 'GK 멀리 던지기',
-            'th': 'a'
+            'kr': 'GK 멀리 던지기'
         },
         'GK Proficient 1:1 Defense': {
             'vn': 'TM Đối mặt',
             'cn': 'GK1对1',
-            'id': 'a',
-            'kr': 'GK 능숙한 1:1 수비',
-            'th': 'a'
+            'kr': 'GK 능숙한 1:1 수비'
         },
         'GK Swift punching': {
-            'vn': 'a',
-            'cn': 'a',
-            'id': 'a',
-            'kr': 'a',
-            'th': 'a'
+            'vn': 'Đấm bóng',
+            'cn': 'GK 敏捷的拳击球',
+            'kr': 'GK 날렵한 펀칭'
         },
         'Glass Body': {
-            'vn': 'a',
-            'cn': 'a',
-            'id': 'a',
-            'kr': 'a',
-            'th': 'a'
+            'vn': 'Dễ chấn thương',
+            'cn': '玻璃人',
+            'kr': '유리몸'
         },
         'Impressive Skill': {
             'vn': 'Tinh tế',
             'cn': '花式大师',
-            'id': 'a',
-            'kr': '화려한 개인기',
-            'th': 'a'
+            'kr': '화려한 개인기'
         },
         'Insists preferred position': {
-            'vn': 'a',
-            'cn': 'a',
-            'id': 'a',
-            'kr': 'a',
-            'th': 'a'
+            'vn': 'Không linh hoạt',
+            'cn': '固定站位',
+            'kr': '선호 포지션 고집'
         },
         'Leadership': {
             'vn': 'Lãnh đạo',
             'cn': '领导力',
-            'id': 'a',
-            'kr': '리더쉽',
-            'th': 'a'
+            'kr': '리더쉽'
         },
         'Long Throw In': {
-            'vn': 'a',
-            'cn': 'a',
-            'id': 'a',
-            'kr': 'a',
-            'th': 'a'
+            'vn': 'Ném biên xa',
+            'cn': '大力手抛球',
+            'kr': '장거리 드로잉'
         },
         'Outside shooting': {
             'vn': 'Sút má ngoài',
-            'cn': 'a',
-            'id': 'a',
-            'kr': 'a',
-            'th': 'a'
+            'cn': '外脚背射门',
+            'kr': '아웃사이드 슈팅'
         },
         'Pass master': {
             'vn': 'Chuyên gia chuyền bóng',
             'cn': '传球大师',
-            'id': 'a',
-            'kr': '패스 마스터',
-            'th': 'a'
+            'kr': '패스 마스터'
         },
         'Play maker (AI)': {
             'vn': 'Kiến tạo (AI)',
             'cn': '组织型球员 (AI)',
-            'id': 'a',
-            'kr': '플레이 메이커 (AI)',
-            'th': 'a'
+            'kr': '플레이 메이커 (AI)'
         },
         'Powerful driven free kicks': {
             'vn': 'Powerful driven free kicks',
-            'cn': 'a',
-            'id': 'a',
-            'kr': 'a',
-            'th': 'a'
+            'cn': 'Powerful driven free kicks',
+            'kr': 'Powerful driven free kicks'
         },
         'Prefer early cross (AI)': {
-            'vn': 'a',
-            'cn': 'a',
-            'id': 'a',
-            'kr': 'a',
-            'th': 'a'
+            'vn': 'Tạt bóng sớm (AI)',
+            'cn': '斜传好手 (AI)',
+            'kr': '斜传好手 (AI)'
         },
         'Prefer individual play (AI)': {
             'vn': 'Cá nhân (AI)',
-            'cn': 'a',
-            'id': 'a',
-            'kr': 'a',
-            'th': 'a'
+            'cn': '独狼 (AI)',
+            'kr': '개인 플레이 선호 (AI)'
         },
         'Prefer long pass (AI)': {
             'vn': 'Chuyền dài (AI)',
             'cn': '善于长传 (AI)',
-            'id': 'a',
-            'kr': '긴 패스 선호 (AI)',
-            'th': 'a'
+            'kr': '긴 패스 선호 (AI)'
         },
         'Prefer long shot (AI)': {
             'vn': 'Sút xa (AI)',
             'cn': '重炮手 (AI)',
-            'id': 'a',
-            'kr': '중거리 슛 선호 (AI)',
-            'th': 'a'
+            'kr': '중거리 슛 선호 (AI)'
         },
         'Prefer main feet': {
             'vn': 'Tránh sai chân thuận',
-            'cn': 'a',
-            'id': 'a',
-            'kr': 'a',
-            'th': 'a'
+            'cn': '善用惯用脚',
+            'kr': '주발 선호'
         },
         'Prefer sliding tackle (AI)': {
             'vn': 'Xoạc bóng (AI)',
             'cn': '铲断高手 (AI)',
-            'id': 'a',
-            'kr': '슬라이딩 태클 선호 (AI)',
-            'th': 'a'
+            'kr': '슬라이딩 태클 선호 (AI)'
         },
         'Sharp curling shot': {
             'vn': 'Sút xoáy',
             'cn': 'a搓射高手',
-            'id': 'a',
-            'kr': '예리한 감아차기',
-            'th': 'a'
+            'kr': '예리한 감아차기'
         },
         'Short tempered': {
             'vn': 'Tranh cãi trọng tài',
             'cn': '与裁判争论',
-            'id': 'a',
-            'kr': '다혈질',
-            'th': 'a'
+            'kr': '다혈질'
         },
         'Speed dribbler': {
             'vn': 'Speed dribbler',
-            'cn': 'a',
-            'id': 'a',
-            'kr': 'a',
-            'th': 'a'
+            'cn': 'Speed dribbler',
+            'kr': 'Speed dribbler'
         },
         'Steel Body': {
             'vn': 'Cứng cỏi',
             'cn': '不易受伤',
-            'id': 'a',
-            'kr': '강철몸',
-            'th': 'a'
+            'kr': '강철몸'
         },
         'Strong Header': {
             'vn': 'Đánh đầu mạnh',
             'cn': '强力头球',
-            'id': 'a',
-            'kr': '강력한 헤딩',
-            'th': 'a'
+            'kr': '강력한 헤딩'
         },
         'Super long throw in': {
-            'vn': 'a',
-            'cn': 'a',
-            'id': 'a',
-            'kr': 'a',
-            'th': 'a'
+            'vn': 'Ném biên rất xa',
+            'cn': '特大力手抛球',
+            'kr': '초장거리 드로잉'
         },
         'Tries To Beat Offside Trap': {
             'vn': 'Tries To Beat Offside Trap',
-            'cn': 'a',
-            'id': 'a',
-            'kr': 'a',
-            'th': 'a'
+            'cn': 'Tries To Beat Offside Trap',
+            'kr': 'Tries To Beat Offside Trap'
         }
     },
     SPECIALITIES: {
