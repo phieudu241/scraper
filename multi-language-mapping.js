@@ -59,31 +59,31 @@ module.exports = Object.freeze({
             'th': 'a'
         },
         'Fantastic clear': {
-            'vn': 'a',
-            'cn': 'a',
+            'vn': 'Siêu cản phá',
+            'cn': '华丽的防御',
             'id': 'a',
-            'kr': 'a',
+            'kr': '화려한 걷어내기',
             'th': 'a'
         },
         'GK Assist in Offense (AI)': {
-            'vn': 'a',
-            'cn': 'a',
+            'vn': 'Lao lên tham gia phạt góc (AI)',
+            'cn': 'GK 参与进攻 (AI)',
             'id': 'a',
-            'kr': 'a',
+            'kr': 'GK 공격 가담 (AI)',
             'th': 'a'
         },
         'GK Long Throw': {
-            'vn': 'a',
-            'cn': 'a',
+            'vn': 'Thủ môn ném xa',
+            'cn': 'GK 大力手抛球',
             'id': 'a',
-            'kr': 'a',
+            'kr': 'GK 멀리 던지기',
             'th': 'a'
         },
         'GK Proficient 1:1 Defense': {
-            'vn': 'a',
-            'cn': 'a',
+            'vn': 'TM Đối mặt',
+            'cn': 'GK1对1',
             'id': 'a',
-            'kr': 'a',
+            'kr': 'GK 능숙한 1:1 수비',
             'th': 'a'
         },
         'GK Swift punching': {
@@ -115,10 +115,10 @@ module.exports = Object.freeze({
             'th': 'a'
         },
         'Leadership': {
-            'vn': 'a',
-            'cn': 'a',
+            'vn': 'Lãnh đạo',
+            'cn': '领导力',
             'id': 'a',
-            'kr': 'a',
+            'kr': '리더쉽',
             'th': 'a'
         },
         'Long Throw In': {
@@ -192,10 +192,10 @@ module.exports = Object.freeze({
             'th': 'a'
         },
         'Prefer sliding tackle (AI)': {
-            'vn': 'a',
-            'cn': 'a',
+            'vn': 'Xoạc bóng (AI)',
+            'cn': '铲断高手 (AI)',
             'id': 'a',
-            'kr': 'a',
+            'kr': '슬라이딩 태클 선호 (AI)',
             'th': 'a'
         },
         'Sharp curling shot': {
