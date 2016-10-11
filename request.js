@@ -8,7 +8,7 @@ var LANGUAGE_MAPPING = require('./multi-language-mapping');
 var app = express();
 
 var BASE_PLAYER_URL = "http://en.fifaaddict.com/fo3player.php?id=";
-var SEARCH_BY_SEASON_URL = "http://en.fifaaddict.com/fo3db.php?q=player&season=";
+var SEARCH_BY_SEASON_URL = "http://en.fifaaddict.com/fo3db.php?q=player&limit=500&player&season=";
 
 var PLAYER_ATTRIBUTES = [
     "overallrating",
@@ -55,7 +55,7 @@ app.get('/test', function (req, res) {
 });
 
 app.get('/scrape', function (req, res) {
-    var playerIds = fs.readFileSync('2007.txt').toString().split('\r\n');
+    var playerIds = fs.readFileSync('./input/Not_Found.txt').toString().split('\r\n');
     var startIndex = 0;
     getPlayer(playerIds, startIndex, res, fs);
 });
@@ -116,42 +116,49 @@ function parsePlayerIds(html) {
 function getPlayer(playerIds, index, res, fs) {
     let playerId = playerIds[index];
 
-    let url = BASE_PLAYER_URL + playerId;
+    if (!playerId || playerId.trim() == '' || playerId.indexOf('//') > - 1 || playerId.indexOf('#') > - 1) {
+        // Ignore comment row
+        next('Comment', playerId, playerIds, index, res, fs);
+    } else {
+        let url = BASE_PLAYER_URL + playerId;
 
-    request(url, function (error, response, html) {
-        if (!error) {
-            let player = parsePlayer(html, playerId);
+        request(url, function (error, response, html) {
+            if (!error) {
+                let player = parsePlayer(html, playerId);
 
-            if (player) {
-                // Write JSON file here
-                writeJSON(playerId, player, fs);
-                next('', playerId, playerIds, index, res, fs);
+                if (player) {
+                    // Write JSON file here
+                    writeJSON(playerId, player, fs);
+                    next('', playerId, playerIds, index, res, fs);
+                } else {
+                    next(' - Not Found', playerId, playerIds, index, res, fs);
+                }
+
             } else {
-                next(' - Not Found', playerId, playerIds, index, res, fs);
+                next(' - Error', playerId, playerIds, index, res, fs);
+
+                console.log('Get error for player with id: ' + playerId);
+                res.send('Error');
             }
-
-        } else {
-            next(' - Error', playerId, playerIds, index, res, fs);
-
-            console.log('Get error for player with id: ' + playerId);
-            res.send('Error');
-        }
-    });
+        });
+    }
 }
 
 function writeJSON(playerId, player, fs) {
-    var playersStr = fs.readFileSync('players.json').toString();
+    var playersStr = fs.readFileSync('./output/Not_Found_players.json').toString();
     var players = {};
     if (playersStr != undefined && playersStr.trim() != '') {
         players = JSON.parse(playersStr);
     }
     players[playerId] = player;
 
-    fs.writeFileSync('players.json', JSON.stringify(players));
+    fs.writeFileSync('./output/Not_Found_players.json', JSON.stringify(players));
 }
 
 function next(type, playerId, playerIds, index, res, fs) {
-    fs.appendFileSync("./output.txt", playerId.toString() + type + "\r\n");
+    if (type != 'Comment') {
+        fs.appendFileSync("./output/Not_Found_output.txt", playerId.toString() + type + "\r\n");
+    }
 
     if (index++ < (playerIds.length - 1)) {
         getPlayer(playerIds, index, res, fs);
@@ -213,7 +220,7 @@ function parsePlayer(html, playerId) {
             positions[$this.find('.badge_position').text()] = $this.find('.stat_value').text();
 
             if ($this.attr('class').indexOf('player_position_active') > -1) {
-                player['overallrating'] = $this.find('.stat_value').text();
+                player['overallrating'] = parsePlayerAttribute('overallrating', $this.find('.stat_value').text());
             }
         });
 
@@ -310,7 +317,8 @@ function getValueFromHref(href, delicator) {
 
 function parsePlayerAttribute(key, value) {
     if (PLAYER_ATTRIBUTES.indexOf(key) > -1) {
-        value = parseInt(value);
+        // Level 1 (+5)
+        value = parseInt(value) + 5;
     }
 
     return value;
