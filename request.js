@@ -64,6 +64,9 @@ app.get('/getPlayerIdsBySeason/:season', function (req, res) {
     getPlayerIds(req.params.season, res);
 });
 
+app.get('/convert', function (req, res) {
+    convertJsonToCsv('./output/result/players_draft.json', './output/players.csv', res);
+});
 
 function getPlayerIds(season, res) {
 
@@ -322,6 +325,54 @@ function parsePlayerAttribute(key, value) {
     }
 
     return value;
+}
+
+function convertJsonToCsv(jsonFile, csvFile, res) {
+    var playersStr = fs.readFileSync(jsonFile).toString();
+    var players = {};
+    if (playersStr != undefined && playersStr.trim() != '') {
+        players = JSON.parse(playersStr);
+    }
+
+    var header = false;
+
+    for (var playerId in players) {
+        var playerInfo = players[playerId];
+        // Write Header Row
+        if (!header) {
+            var headerRow = [];
+            for (var property in playerInfo) {
+                headerRow.push(property);
+            }
+
+            fs.appendFileSync(csvFile, headerRow.join(',') + "\r\n");
+
+            header = true;
+        }
+
+        var dataRow = [];
+        for (var property in playerInfo) {
+            if (playerInfo[property] instanceof Array) {
+                dataRow.push('"' +  playerInfo[property].join(',') + '"');
+            } else if (playerInfo[property] instanceof Object) {
+                var detailInfo = [];
+                for (var detailProp in playerInfo[property]) {
+                    detailInfo.push(detailProp + '-' + playerInfo[property][detailProp]);
+                }
+                dataRow.push('"' +  detailInfo.join(',') + '"');
+            } else {
+                if (typeof(playerInfo[property]) == 'string') {
+                    dataRow.push('"' + playerInfo[property] + '"');
+                } else {
+                    dataRow.push(playerInfo[property]);
+                }
+            }
+        }
+
+        fs.appendFileSync(csvFile, dataRow.join(',') + "\r\n");
+    }
+
+    res.send('Finished!');
 }
 
 app.listen(app.get('port'), function() {
