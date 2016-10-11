@@ -44,7 +44,8 @@ var PLAYER_ATTRIBUTES = [
     "gkhandling",
     "gkkicking",
     "gkreflexes",
-    "gkpositioning"
+    "gkpositioning",
+    "poten"
 ];
 
 app.set('port', (process.env.PORT || 5000));
@@ -54,17 +55,17 @@ app.get('/test', function (req, res) {
 });
 
 app.get('/scrape', function (req, res) {
-    var playerIds = fs.readFileSync('player_ids.txt').toString().split('\r\n');
+    var playerIds = fs.readFileSync('2007.txt').toString().split('\r\n');
     var startIndex = 0;
     getPlayer(playerIds, startIndex, res, fs);
 });
 
 app.get('/getPlayerIdsBySeason/:season', function (req, res) {
-    getPlayerIds(req.params.season);
+    getPlayerIds(req.params.season, res);
 });
 
 
-function getPlayerIds(season) {
+function getPlayerIds(season, res) {
 
     let url = SEARCH_BY_SEASON_URL + season;
 
@@ -75,6 +76,8 @@ function getPlayerIds(season) {
             if (playerIds && playerIds.length) {
                 writeIdsFile(playerIds, season);
             }
+
+            res.send('Finished!');
 
         } else {
             console.log('Get error for search with season: ' + season);
@@ -96,13 +99,13 @@ function parsePlayerIds(html) {
     let prefix = 'player_id';
     let prefixLength = prefix.length;
 
-    $('#fo3-search-result .playerlistable tr').each(function (i, el) {
+    $('#fo3-search-result #playerlistable tr.player-row').each(function (i, el) {
         let $el = $(el);
         let id = $el.attr('id');
 
         
         if (id.indexOf(prefix) == 0) {
-            playerIds.push(substring(prefixLength));
+            playerIds.push(id.substring(prefixLength));
         }
     });
 
