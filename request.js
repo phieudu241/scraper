@@ -77,32 +77,35 @@ app.get('/scrape', function (req, res) {
 
 app.get('/getPlayerIdsBySeason/:season', function (req, res) {
     let url = SEARCH_BY_SEASON_URL + req.params.season;
-    getPlayerIds(url, req.params.season, res);
+    getPlayerIds(url, req.params.season);
+    res.send('Doing....');
 });
 
 app.get('/getPlayerIdsByCountries', function (req, res) {
-    getPlayerIdsByCountries(COUNTRIES_CONSTANTS.COUNTRIES, 0, res);
+    getPlayerIdsByCountries(COUNTRIES_CONSTANTS.COUNTRIES, 0);
+    res.send('Doing....');
 });
 
-function getPlayerIdsByCountries(countries, index, res) {
+app.get('/convert', function (req, res) {
+    convertJsonToCsv(CONVERT_JSON_INPUT_FILE, CONVERT_CSV_OUTPUT_FILE);
+    res.send('Doing....');
+});
+
+function getPlayerIdsByCountries(countries, index) {
     let url = SEARCH_BY_COUNTRY_URL + countries[index];
     //Add Header
     console.log(countries[index]);
     fs.appendFileSync(SEARCH_BY_COUNTRY_OUTPUT_FILE, '#' + countries[index] + "\r\n");
-    getPlayerIds(url, SEARCH_BY_COUNTRY_OUTPUT_FILE_NAME, res, function () {
+    getPlayerIds(url, SEARCH_BY_COUNTRY_OUTPUT_FILE_NAME, function () {
         if (index++ < countries.length - 1) {
-            getPlayerIdsByCountries(countries, index, res);
+            getPlayerIdsByCountries(countries, index);
         } else {
-            res.send('Finished!');
+            console.log('Finished!');
         }
     });
 }
 
-app.get('/convert', function (req, res) {
-    convertJsonToCsv(CONVERT_JSON_INPUT_FILE, CONVERT_CSV_OUTPUT_FILE, res);
-});
-
-function getPlayerIds(url, outputFileName, res, callback) {
+function getPlayerIds(url, outputFileName, callback) {
 
     request(url, function (error, response, html) {
         if (!error) {
@@ -115,7 +118,7 @@ function getPlayerIds(url, outputFileName, res, callback) {
             if (callback) {
                 callback();
             } else {
-                res.send('Finished!');
+                console.log('Finished!');
             }
 
         } else {
@@ -123,7 +126,6 @@ function getPlayerIds(url, outputFileName, res, callback) {
             if (callback) {
                 callback();
             } else {
-                //res.send('Error');
                 console.log('Error');
             }
         }
@@ -180,7 +182,6 @@ function getPlayer(playerIds, index, fs) {
             } else {
                 console.log('Get error for player with id: ' + playerId);
                 next(' - Error', playerId, playerIds, index, fs);
-                //res.send('Error');
             }
         });
     }
@@ -375,7 +376,7 @@ function getLevel1(value) {
     return parseInt(value) + 5;
 }
 
-function convertJsonToCsv(jsonFile, csvFile, res) {
+function convertJsonToCsv(jsonFile, csvFile) {
     var playersStr = fs.readFileSync(jsonFile).toString();
     var players = {};
     if (playersStr != undefined && playersStr.trim() != '') {
@@ -420,7 +421,7 @@ function convertJsonToCsv(jsonFile, csvFile, res) {
         fs.appendFileSync(csvFile, dataRow.join(',') + "\r\n");
     }
 
-    res.send('Finished!');
+    console.log('Finished!');
 }
 
 app.listen(app.get('port'), function() {
