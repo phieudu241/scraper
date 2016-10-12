@@ -3,7 +3,7 @@ var express = require('express');
 var fs = require('fs');
 var request = require('request');
 var cheerio = require('cheerio');
-var _ = require('lodash');
+//var _ = require('lodash');
 var LANGUAGE_MAPPING = require('./multi-language-mapping');
 var COUNTRIES_CONSTANTS = require('./countries');
 
@@ -15,14 +15,14 @@ var SEARCH_BY_SEASON_URL = "http://en.fifaaddict.com/fo3db.php?q=player&limit=50
 // Just get id for player overallrating >= 70
 var SEARCH_BY_COUNTRY_URL = "http://en.fifaaddict.com/fo3db.php?q=player&limit=500&player&ability=overallrating_70&nation=";
 
-var SCAPE_INPUT_FILE = './input/rest.txt';
-var SCAPE_OUTPUT_FILE = './output/allPlayerIds_overallrating=70_part1.json';
-var SCAPE_OUTPUT_LOG_FILE = './output/allPlayerIds_overallrating=70_part1_log.txt';
+var SCAPE_INPUT_FILE = './input/allPlayerIds_overallrating=70_part6_rest.txt';
+var SCAPE_OUTPUT_FILE = './output/allPlayerIds_overallrating=70_part6_rest.json';
+var SCAPE_OUTPUT_LOG_FILE = './output/allPlayerIds_overallrating=70_part6_rest_log.txt';
 
 var SEARCH_BY_COUNTRY_OUTPUT_FILE = "./output/playerIdsByCountry.txt";
 var SEARCH_BY_COUNTRY_OUTPUT_FILE_NAME = "playerIdsByCountry";
-var CONVERT_JSON_INPUT_FILE = './output/players_level1.json';
-var CONVERT_CSV_OUTPUT_FILE = './output/players_level1.csv';
+var CONVERT_JSON_INPUT_FILE = './output/allPlayerIds_overallrating=70_part5_rest.json';
+var CONVERT_CSV_OUTPUT_FILE = './output/allPlayerIds_overallrating=70_part5_rest.csv';
 
 var PLAYER_ATTRIBUTES = [
     "overallrating",
