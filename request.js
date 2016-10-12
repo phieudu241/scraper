@@ -65,7 +65,7 @@ app.get('/getPlayerIdsBySeason/:season', function (req, res) {
 });
 
 app.get('/convert', function (req, res) {
-    convertJsonToCsv('./output/result/players_draft.json', './output/players.csv', res);
+    convertJsonToCsv('./output/result/players.json', './output/players.csv', res);
 });
 
 function getPlayerIds(season, res) {
