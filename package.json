@@ -21,9 +21,9 @@
   },
   "homepage": "https://github.com/phieudu241/scraper#readme",
   "dependencies": {
-    "express": "latest",
     "cheerio": "latest",
     "express": "latest",
+    "lodash": "^4.16.4",
     "request": "latest"
   }
 }

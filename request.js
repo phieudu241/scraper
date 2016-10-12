@@ -3,12 +3,26 @@ var express = require('express');
 var fs = require('fs');
 var request = require('request');
 var cheerio = require('cheerio');
+var _ = require('lodash');
 var LANGUAGE_MAPPING = require('./multi-language-mapping');
+var COUNTRIES_CONSTANTS = require('./countries');
 
 var app = express();
 
+//var BASE_PLAYER_URL = "http://en.fifaaddict.com/fo3player.php?id=";
 var BASE_PLAYER_URL = "http://en.fifaaddict.com/fo3player.php?id=";
 var SEARCH_BY_SEASON_URL = "http://en.fifaaddict.com/fo3db.php?q=player&limit=500&player&season=";
+// Just get id for player overallrating >= 70
+var SEARCH_BY_COUNTRY_URL = "http://en.fifaaddict.com/fo3db.php?q=player&limit=500&player&ability=overallrating_70&nation=";
+
+var SCAPE_INPUT_FILE = './input/rest.txt';
+var SCAPE_OUTPUT_FILE = './output/allPlayerIds_overallrating=70_part1.json';
+var SCAPE_OUTPUT_LOG_FILE = './output/allPlayerIds_overallrating=70_part1_log.txt';
+
+var SEARCH_BY_COUNTRY_OUTPUT_FILE = "./output/playerIdsByCountry.txt";
+var SEARCH_BY_COUNTRY_OUTPUT_FILE_NAME = "playerIdsByCountry";
+var CONVERT_JSON_INPUT_FILE = './output/players_level1.json';
+var CONVERT_CSV_OUTPUT_FILE = './output/players_level1.csv';
 
 var PLAYER_ATTRIBUTES = [
     "overallrating",
@@ -55,36 +69,63 @@ app.get('/test', function (req, res) {
 });
 
 app.get('/scrape', function (req, res) {
-    var playerIds = fs.readFileSync('./input/Not_Found.txt').toString().split('\r\n');
+    var playerIds = fs.readFileSync(SCAPE_INPUT_FILE).toString().split('\r\n');
     var startIndex = 0;
-    getPlayer(playerIds, startIndex, res, fs);
+    getPlayer(playerIds, startIndex, fs);
+    res.send('Doing....');
 });
 
 app.get('/getPlayerIdsBySeason/:season', function (req, res) {
-    getPlayerIds(req.params.season, res);
+    let url = SEARCH_BY_SEASON_URL + req.params.season;
+    getPlayerIds(url, req.params.season, res);
 });
+
+app.get('/getPlayerIdsByCountries', function (req, res) {
+    getPlayerIdsByCountries(COUNTRIES_CONSTANTS.COUNTRIES, 0, res);
+});
+
+function getPlayerIdsByCountries(countries, index, res) {
+    let url = SEARCH_BY_COUNTRY_URL + countries[index];
+    //Add Header
+    console.log(countries[index]);
+    fs.appendFileSync(SEARCH_BY_COUNTRY_OUTPUT_FILE, '#' + countries[index] + "\r\n");
+    getPlayerIds(url, SEARCH_BY_COUNTRY_OUTPUT_FILE_NAME, res, function () {
+        if (index++ < countries.length - 1) {
+            getPlayerIdsByCountries(countries, index, res);
+        } else {
+            res.send('Finished!');
+        }
+    });
+}
 
 app.get('/convert', function (req, res) {
-    convertJsonToCsv('./output/result/players.json', './output/players.csv', res);
+    convertJsonToCsv(CONVERT_JSON_INPUT_FILE, CONVERT_CSV_OUTPUT_FILE, res);
 });
 
-function getPlayerIds(season, res) {
-
-    let url = SEARCH_BY_SEASON_URL + season;
+function getPlayerIds(url, outputFileName, res, callback) {
 
     request(url, function (error, response, html) {
         if (!error) {
             let playerIds = parsePlayerIds(html);
 
             if (playerIds && playerIds.length) {
-                writeIdsFile(playerIds, season);
+                writeIdsFile(playerIds, outputFileName);
             }
 
-            res.send('Finished!');
+            if (callback) {
+                callback();
+            } else {
+                res.send('Finished!');
+            }
 
         } else {
-            console.log('Get error for search with season: ' + season);
-            res.send('Error');
+            console.log('Get error for search with reason: ' + outputFileName);
+            if (callback) {
+                callback();
+            } else {
+                //res.send('Error');
+                console.log('Error');
+            }
         }
     });
 }
@@ -92,7 +133,7 @@ function getPlayerIds(season, res) {
 function writeIdsFile(playerIds, filename) {
     for (var i = playerIds.length - 1; i >= 0; i--) {
         console.log(playerIds[i]);
-        fs.appendFileSync("./" + filename +".txt", playerIds[i] + "\r\n");
+        fs.appendFileSync("./output/" + filename +".txt", playerIds[i] + "\r\n");
     }
 }
 
@@ -116,15 +157,14 @@ function parsePlayerIds(html) {
 }
 
 
-function getPlayer(playerIds, index, res, fs) {
+function getPlayer(playerIds, index, fs) {
     let playerId = playerIds[index];
 
     if (!playerId || playerId.trim() == '' || playerId.indexOf('//') > - 1 || playerId.indexOf('#') > - 1) {
         // Ignore comment row
-        next('Comment', playerId, playerIds, index, res, fs);
+        next('Comment', playerId, playerIds, index, fs);
     } else {
         let url = BASE_PLAYER_URL + playerId;
-
         request(url, function (error, response, html) {
             if (!error) {
                 let player = parsePlayer(html, playerId);
@@ -132,42 +172,41 @@ function getPlayer(playerIds, index, res, fs) {
                 if (player) {
                     // Write JSON file here
                     writeJSON(playerId, player, fs);
-                    next('', playerId, playerIds, index, res, fs);
+                    next('', playerId, playerIds, index, fs);
                 } else {
-                    next(' - Not Found', playerId, playerIds, index, res, fs);
+                    next(' - Not Found', playerId, playerIds, index, fs);
                 }
 
             } else {
-                next(' - Error', playerId, playerIds, index, res, fs);
-
                 console.log('Get error for player with id: ' + playerId);
-                res.send('Error');
+                next(' - Error', playerId, playerIds, index, fs);
+                //res.send('Error');
             }
         });
     }
 }
 
 function writeJSON(playerId, player, fs) {
-    var playersStr = fs.readFileSync('./output/Not_Found_players.json').toString();
+    var playersStr = fs.readFileSync(SCAPE_OUTPUT_FILE).toString();
     var players = {};
     if (playersStr != undefined && playersStr.trim() != '') {
         players = JSON.parse(playersStr);
     }
     players[playerId] = player;
 
-    fs.writeFileSync('./output/Not_Found_players.json', JSON.stringify(players));
+    fs.writeFileSync(SCAPE_OUTPUT_FILE, JSON.stringify(players));
 }
 
-function next(type, playerId, playerIds, index, res, fs) {
+function next(type, playerId, playerIds, index, fs) {
+    console.log(index);
     if (type != 'Comment') {
-        fs.appendFileSync("./output/Not_Found_output.txt", playerId.toString() + type + "\r\n");
+        fs.appendFileSync(SCAPE_OUTPUT_LOG_FILE, playerId.toString() + type + "\r\n");
     }
 
     if (index++ < (playerIds.length - 1)) {
-        getPlayer(playerIds, index, res, fs);
+        getPlayer(playerIds, index, fs);
     } else {
         console.log('Finished!');
-        res.send('Finished!');
     }
 }
 
@@ -183,6 +222,8 @@ function parsePlayer(html, playerId) {
             let value = $el.find('.stat_value').text();
             player[key] = parsePlayerAttribute(key, value);
         });
+
+        if (!player['poten']) player['poten'] = 1;
 
         // Localize perfcon attr
         player['perfcon_vn'] = getLanguageMapping(LANGUAGE_MAPPING.PERF_CON, player['perfcon'], 'vn');
@@ -220,7 +261,7 @@ function parsePlayer(html, playerId) {
 
         $positions.find('.player_position_list').each(function (i, el) {
             let $this = $(el);
-            positions[$this.find('.badge_position').text()] = $this.find('.stat_value').text();
+            positions[$this.find('.badge_position').text()] = getLevel1($this.find('.stat_value').text());
 
             if ($this.attr('class').indexOf('player_position_active') > -1) {
                 player['overallrating'] = parsePlayerAttribute('overallrating', $this.find('.stat_value').text());
@@ -256,7 +297,9 @@ function parsePlayer(html, playerId) {
         let speciality_vn = [];
         let speciality_cn = [];
         let speciality_kr = [];
-        $playerStatInner.find('.speciality b').each(function (i, el) {
+
+        let $traits = $playerStatInner.find('.trait.speciality.sm');
+        $traits.find('b').each(function (i, el) {
             let value = $(el).text().trim();
             speciality.push(value);
             speciality_vn.push(getLanguageMapping(LANGUAGE_MAPPING.SPECIALITIES, value, 'vn'));
@@ -273,7 +316,7 @@ function parsePlayer(html, playerId) {
         let hiddenScore_vn = [];
         let hiddenScore_cn = [];
         let hiddenScore_kr = [];
-        $($playerStatInner.find('.trait.sm')[1]).find('b').each(function (i, el) {
+        $playerStatInner.find('.trait.sm').not('.speciality').find('b').each(function (i, el) {
             let hiddenAttr = $(el).text().trim();
             hiddenScore.push(hiddenAttr);
             hiddenScore_vn.push(getLanguageMapping(LANGUAGE_MAPPING.HIDDEN_STATS, hiddenAttr, 'vn'));
@@ -288,7 +331,7 @@ function parsePlayer(html, playerId) {
         player = undefined;
     }
 
-    console.log(player);
+    console.log(player ? 'OK' : player);
 
     return player;
 }
@@ -321,10 +364,15 @@ function getValueFromHref(href, delicator) {
 function parsePlayerAttribute(key, value) {
     if (PLAYER_ATTRIBUTES.indexOf(key) > -1) {
         // Level 1 (+5)
-        value = parseInt(value) + 5;
+        value = getLevel1(value);
     }
 
     return value;
+}
+
+function getLevel1(value) {
+    // Level 1 (+5)
+    return parseInt(value) + 5;
 }
 
 function convertJsonToCsv(jsonFile, csvFile, res) {
