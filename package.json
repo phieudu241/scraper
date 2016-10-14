@@ -2,10 +2,10 @@
   "name": "scraper",
   "version": "1.0.0",
   "description": "Scrape player info",
-  "main": "index.js",
+  "main": "request.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
+    "start": "node request.js"
   },
   "repository": {
     "type": "git",

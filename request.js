@@ -3,17 +3,17 @@ var express = require('express');
 var fs = require('fs');
 var request = require('request');
 var cheerio = require('cheerio');
-//var _ = require('lodash');
+var _ = require('lodash');
 var LANGUAGE_MAPPING = require('./multi-language-mapping');
-var COUNTRIES_CONSTANTS = require('./countries');
+var CONSTANTS = require('./constants');
 
 var app = express();
 
-//var BASE_PLAYER_URL = "http://en.fifaaddict.com/fo3player.php?id=";
 var BASE_PLAYER_URL = "http://en.fifaaddict.com/fo3player.php?id=";
 var SEARCH_BY_SEASON_URL = "http://en.fifaaddict.com/fo3db.php?q=player&limit=500&player&season=";
 // Just get id for player overallrating >= 70
 var SEARCH_BY_COUNTRY_URL = "http://en.fifaaddict.com/fo3db.php?q=player&limit=500&player&ability=overallrating_70&nation=";
+var LIVEBOOST_URL = "http://en.fifaaddict.com/fo3db.php?q=player&ability=overallrating_70&liveboost=yes&limit=500";
 
 var SCAPE_INPUT_FILE = './input/test.txt';
 var SCAPE_OUTPUT_FILE = './output/test.json';
@@ -27,44 +27,6 @@ var SEARCH_BY_COUNTRY_OUTPUT_FILE = "./output/playerIdsByCountry.txt";
 var SEARCH_BY_COUNTRY_OUTPUT_FILE_NAME = "playerIdsByCountry";
 var CONVERT_JSON_INPUT_FILE = './output/test.json';
 var CONVERT_CSV_OUTPUT_FILE = './output/test.csv';
-
-var PLAYER_ATTRIBUTES = [
-    "overallrating",
-    "finishing",
-    "shotpower",
-    "curve",
-    "longshots",
-    "volleys",
-    "freekickaccuracy",
-    "penalties",
-    "headingaccuracy",
-    "positioning",
-    "sprintspeed",
-    "acceleration",
-    "agility",
-    "reactions",
-    "jumping",
-    "stamina",
-    "strength",
-    "balance",
-    "shortpassing",
-    "longpassing",
-    "crossing",
-    "ballcontrol",
-    "dribbling",
-    "tacticalawareness",
-    "vision",
-    "standingtackle",
-    "slidingtackle",
-    "marking",
-    "aggression",
-    "gkdiving",
-    "gkhandling",
-    "gkkicking",
-    "gkreflexes",
-    "gkpositioning",
-    "poten"
-];
 
 app.set('port', (process.env.PORT || 5000));
 
@@ -93,7 +55,7 @@ app.get('/getPlayerIdsBySeason/:season', function (req, res) {
 });
 
 app.get('/getPlayerIdsByCountries', function (req, res) {
-    getPlayerIdsByCountries(COUNTRIES_CONSTANTS.COUNTRIES, 0);
+    getPlayerIdsByCountries(CONSTANTS.COUNTRIES, 0);
     res.send('Doing....');
 });
 
@@ -101,6 +63,29 @@ app.get('/convert', function (req, res) {
     convertJsonToCsv(CONVERT_JSON_INPUT_FILE, CONVERT_CSV_OUTPUT_FILE);
     res.send('Doing....');
 });
+
+app.get('/getLiveBoost', function (req, res) {
+    getLiveBoost(res);
+});
+
+app.listen(app.get('port'), function() {
+    console.log('Node app is running on port', app.get('port'));
+});
+
+function getLiveBoost(res) {
+    request(LIVEBOOST_URL, function (error, response, html) {
+        if (!error) {
+            var liveBoostInfo = parseLiveBoost(html);
+            if (liveBoostInfo) {
+                res.send(liveBoostInfo);
+            } else {
+                res.sendStatus(403);
+            }
+        } else {
+            res.sendStatus(500);
+        }
+    });
+}
 
 function getPlayerIdsByCountries(countries, index) {
     let url = SEARCH_BY_COUNTRY_URL + countries[index];
@@ -117,7 +102,6 @@ function getPlayerIdsByCountries(countries, index) {
 }
 
 function getPlayerIds(url, outputFileName, callback) {
-
     request(url, function (error, response, html) {
         if (!error) {
             let playerIds = parsePlayerIds(html);
@@ -150,25 +134,52 @@ function writeIdsFile(playerIds, filename) {
     }
 }
 
+function parseLiveBoost(html) {
+    let $ = cheerio.load(html);
+    let liveBoostInfo;
+
+    let $resultDiv = $('#fo3-search-result');
+    if ($resultDiv.length > 0) {
+        liveBoostInfo = {};
+
+        $resultDiv.find('#playerlistable tr.player-row').each(function (i, el) {
+            let $el = $(el),
+                id = $el.attr('id'),
+                extractedId = extractId(id);
+            if (extractedId) {
+                let boostValue = $el.find('span.liveboost b').text();
+                if (boostValue) {
+                    liveBoostInfo[extractedId] = boostValue;
+                }
+            }
+        });
+    }
+
+    return liveBoostInfo;
+}
+
 function parsePlayerIds(html) {
     let $ = cheerio.load(html);
     let playerIds = [];
-    let prefix = 'player_id';
-    let prefixLength = prefix.length;
 
     $('#fo3-search-result #playerlistable tr.player-row').each(function (i, el) {
-        let $el = $(el);
-        let id = $el.attr('id');
-
-        
-        if (id.indexOf(prefix) == 0) {
-            playerIds.push(id.substring(prefixLength));
+        let $el = $(el),
+            id = $el.attr('id'),
+            extractedId = extractId(id);
+        if (extractedId) {
+            playerIds.push(extractedId);
         }
     });
 
     return playerIds;
 }
 
+function extractId(id) {
+    let prefix = 'player_id',
+        prefixLength = prefix.length;
+
+    return (id.indexOf(prefix) == 0) ? id.substring(prefixLength) : undefined;
+}
 
 function getPlayer(playerIds, index, fs) {
     let playerId = playerIds[index];
@@ -393,10 +404,9 @@ function parsePlayer(html, playerId) {
     return player;
 }
 
-
-function parseImageId(html, playerId) {
-    var $ = cheerio.load(html);
-    var imageId;
+function parseImageId(html) {
+    var $ = cheerio.load(html),
+        imageId;
 
     if ($('.stat_list').length > 0) {
         let $f3playerTopInfo = $('.f3player_topinfo');
@@ -409,6 +419,7 @@ function parseImageId(html, playerId) {
 
     return imageId;
 }
+
 function getLanguageMapping(map, key, language) {
     if (map[key] && map[key][language]) return map[key][language];
     return key;
@@ -435,8 +446,7 @@ function getValueFromHref(href, delicator) {
 }
 
 function parsePlayerAttribute(key, value) {
-    if (PLAYER_ATTRIBUTES.indexOf(key) > -1) {
-        // Level 1 (+5)
+    if (CONSTANTS.PLAYER_ATTRIBUTES.indexOf(key) > -1) {
         value = getLevel1(value);
     }
 
@@ -495,7 +505,3 @@ function convertJsonToCsv(jsonFile, csvFile) {
 
     console.log('Finished!');
 }
-
-app.listen(app.get('port'), function() {
-    console.log('Node app is running on port', app.get('port'));
-});
