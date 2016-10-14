@@ -19,6 +19,10 @@ var SCAPE_INPUT_FILE = './input/test.txt';
 var SCAPE_OUTPUT_FILE = './output/test.json';
 var SCAPE_OUTPUT_LOG_FILE = './output/test.txt';
 
+var SCAPE_IMAGEID_INTPUT_FILE = './input/scanImageIds.txt';
+var SCAPE_IMAGEID_OUTPUT_FILE = './output/image_id.txt';
+var SCAPE_IMAGEID_OUTPUT_LOG_FILE = './output/image_id_log.txt';
+
 var SEARCH_BY_COUNTRY_OUTPUT_FILE = "./output/playerIdsByCountry.txt";
 var SEARCH_BY_COUNTRY_OUTPUT_FILE_NAME = "playerIdsByCountry";
 var CONVERT_JSON_INPUT_FILE = './output/test.json';
@@ -72,6 +76,13 @@ app.get('/scrape', function (req, res) {
     var playerIds = fs.readFileSync(SCAPE_INPUT_FILE).toString().split('\r\n');
     var startIndex = 0;
     getPlayer(playerIds, startIndex, fs);
+    res.send('Doing....');
+});
+
+app.get('/scrapeImageId', function (req, res) {
+    var playerIds = fs.readFileSync(SCAPE_IMAGEID_INTPUT_FILE).toString().split('\r\n');
+    var startIndex = 0;
+    getImageId(playerIds, startIndex, fs);
     res.send('Doing....');
 });
 
@@ -187,6 +198,34 @@ function getPlayer(playerIds, index, fs) {
     }
 }
 
+function getImageId(playerIds, index, fs) {
+    let playerId = playerIds[index];
+
+    if (!playerId || playerId.trim() == '' || playerId.indexOf('//') > - 1 || playerId.indexOf('#') > - 1) {
+        // Ignore comment row
+        next('Comment', playerId, playerIds, index, fs);
+    } else {
+        let url = BASE_PLAYER_URL + playerId;
+        request(url, function (error, response, html) {
+            if (!error) {
+                let imageId = parseImageId(html, playerId);
+
+                if (imageId) {
+                    // Write ImageId here
+                    fs.appendFileSync(SCAPE_IMAGEID_OUTPUT_FILE, playerId + '-' + imageId + "\r\n");
+                    nextImageId('', playerId, playerIds, index, fs);
+                } else {
+                    console.log('Not Finished');
+                }
+
+            } else {
+                console.log('Get error for player with id: ' + playerId);
+                nextImageId(' - Error', playerId, playerIds, index, fs);
+            }
+        });
+    }
+}
+
 function writeJSON(playerId, player, fs) {
     var playersStr = fs.readFileSync(SCAPE_OUTPUT_FILE).toString();
     var players = {};
@@ -206,6 +245,19 @@ function next(type, playerId, playerIds, index, fs) {
 
     if (index++ < (playerIds.length - 1)) {
         getPlayer(playerIds, index, fs);
+    } else {
+        console.log('Finished!');
+    }
+}
+
+function nextImageId(type, playerId, playerIds, index, fs) {
+    console.log(index);
+    if (type != 'Comment') {
+        fs.appendFileSync(SCAPE_IMAGEID_OUTPUT_LOG_FILE, playerId.toString() + type + "\r\n");
+    }
+
+    if (index++ < (playerIds.length - 1)) {
+        getImageId(playerIds, index, fs);
     } else {
         console.log('Finished!');
     }
@@ -245,6 +297,10 @@ function parsePlayer(html, playerId) {
 
         player['fullname'] = playerName;
         player['shortname'] = getShortname(playerName);
+
+        // imageid
+        let smallImageUrl = $f3playerTopInfo.find('.player_img').attr('src');
+        player['imageid'] = smallImageUrl.substring(smallImageUrl.lastIndexOf('/') + 2, smallImageUrl.indexOf('png') - 1);
 
         // badged
         player['badged'] = $nameEl.find('span').attr('class');
@@ -337,6 +393,22 @@ function parsePlayer(html, playerId) {
     return player;
 }
 
+
+function parseImageId(html, playerId) {
+    var $ = cheerio.load(html);
+    var imageId;
+
+    if ($('.stat_list').length > 0) {
+        let $f3playerTopInfo = $('.f3player_topinfo');
+        // imageid
+        let smallImageUrl = $f3playerTopInfo.find('.player_img').attr('src');
+        imageId = smallImageUrl.substring(smallImageUrl.lastIndexOf('/') + 2, smallImageUrl.indexOf('png') - 1);
+    }
+
+    console.log(imageId ? 'OK' : imageId);
+
+    return imageId;
+}
 function getLanguageMapping(map, key, language) {
     if (map[key] && map[key][language]) return map[key][language];
     return key;
