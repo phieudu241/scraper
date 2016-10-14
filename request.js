@@ -3,7 +3,7 @@ var express = require('express');
 var fs = require('fs');
 var request = require('request');
 var cheerio = require('cheerio');
-var _ = require('lodash');
+//var _ = require('lodash');
 var LANGUAGE_MAPPING = require('./multi-language-mapping');
 var CONSTANTS = require('./constants');
 
@@ -140,7 +140,7 @@ function parseLiveBoost(html) {
 
     let $resultDiv = $('#fo3-search-result');
     if ($resultDiv.length > 0) {
-        liveBoostInfo = {};
+        liveBoostInfo = [];
 
         $resultDiv.find('#playerlistable tr.player-row').each(function (i, el) {
             let $el = $(el),
@@ -149,7 +149,7 @@ function parseLiveBoost(html) {
             if (extractedId) {
                 let boostValue = $el.find('span.liveboost b').text();
                 if (boostValue) {
-                    liveBoostInfo[extractedId] = boostValue;
+                    liveBoostInfo.push({id: extractedId, boost: boostValue});
                 }
             }
         });
