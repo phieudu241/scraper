@@ -79,7 +79,7 @@ function getLiveBoost(res) {
             if (liveBoostInfo) {
                 res.send(liveBoostInfo);
             } else {
-                res.sendStatus(403);
+                res.send("error");
             }
         } else {
             res.sendStatus(500);
