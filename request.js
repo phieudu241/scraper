@@ -275,28 +275,40 @@ function nextImageId(type, playerId, playerIds, index, fs) {
 }
 
 function parsePlayer(html, playerId) {
-    var $ = cheerio.load(html);
-    var player = {pid: playerId};
+    let $ = cheerio.load(html);
+    let $f3playerTopInfo = $('.f3player_topinfo');
+
+    let player = {pid: playerId};
+
+    // imageid
+    let smallImageUrl = $f3playerTopInfo.find('.player_img').attr('src');
+    player['imageid'] = smallImageUrl.substring(smallImageUrl.lastIndexOf('/') + 2, smallImageUrl.indexOf('png') - 1);
 
     if ($('.stat_list').length > 0) {
         // Get player attributes
+        let perfcon = '';
         $('.stat_list').each(function (i, el) {
             let $el = $(el);
             let key = $el.attr('class').split(' ')[1];
             let value = $el.find('.stat_value').text();
-            player[key] = parsePlayerAttribute(key, value);
+            if (key == 'perfcon') {
+                perfcon = parsePlayerAttribute(key, value);
+            } else {
+                player[key] = parsePlayerAttribute(key, value);
+            }
         });
 
         if (!player['poten']) player['poten'] = 1;
 
         // Localize perfcon attr
+        player['perfcon'] = perfcon;
         player['perfcon_vn'] = getLanguageMapping(LANGUAGE_MAPPING.PERF_CON, player['perfcon'], 'vn');
         player['perfcon_cn'] = getLanguageMapping(LANGUAGE_MAPPING.PERF_CON, player['perfcon'], 'cn');
         player['perfcon_id'] = getLanguageMapping(LANGUAGE_MAPPING.PERF_CON, player['perfcon'], 'id');
         player['perfcon_kr'] = getLanguageMapping(LANGUAGE_MAPPING.PERF_CON, player['perfcon'], 'kr');
         player['perfcon_th'] = getLanguageMapping(LANGUAGE_MAPPING.PERF_CON, player['perfcon'], 'th');
 
-        let $f3playerTopInfo = $('.f3player_topinfo');
+        
         let $nameEl = $f3playerTopInfo.find('.player_info_list.player_name a');
         // name
         let playerName = $nameEl.text().trim();
@@ -308,10 +320,6 @@ function parsePlayer(html, playerId) {
 
         player['fullname'] = playerName;
         player['shortname'] = getShortname(playerName);
-
-        // imageid
-        let smallImageUrl = $f3playerTopInfo.find('.player_img').attr('src');
-        player['imageid'] = smallImageUrl.substring(smallImageUrl.lastIndexOf('/') + 2, smallImageUrl.indexOf('png') - 1);
 
         // badged
         player['badged'] = $nameEl.find('span').attr('class');
@@ -395,6 +403,10 @@ function parsePlayer(html, playerId) {
         player['hidden_score_vn'] = hiddenScore_vn;
         player['hidden_score_cn'] = hiddenScore_cn;
         player['hidden_score_kr'] = hiddenScore_kr;
+
+        //liveboost
+        player['isliveboost'] = '';
+        player['boostvalue'] = '';
     } else {
         player = undefined;
     }
