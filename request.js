@@ -15,6 +15,7 @@ var SEARCH_BY_SEASON_URL = "http://en.fifaaddict.com/fo3db.php?q=player&limit=50
 var SEARCH_BY_COUNTRY_URL = "http://en.fifaaddict.com/fo3db.php?q=player&limit=500&player&ability=overallrating_70&nation=";
 var LIVEBOOST_URL = "http://en.fifaaddict.com/fo3db.php?q=player&ability=overallrating_70&liveboost=yes&limit=500";
 var FIFA_NET_PLAYER_URL = "http://fifanet.kr/player/player.fifanet?spid=";
+var ROSTER_UPDATE_URL = "http://en.fifaaddict.com/roster_update_2016_second_half.php";
 
 var SCAPE_INPUT_FILE = './input/test.txt';
 var SCAPE_OUTPUT_FILE = './output/test.json';
@@ -35,6 +36,7 @@ var CONVERT_CSV_OUTPUT_FILE = './output/test.csv';
 
 app.set('port', (process.env.PORT || 5000));
 
+
 app.get('/test', function (req, res) {
     res.send('Hello');
 });
@@ -44,6 +46,10 @@ app.get('/scrape', function (req, res) {
     var startIndex = 0;
     getPlayer(playerIds, startIndex, fs);
     res.send('Doing....');
+});
+
+app.get('/getRosterUpdateIds', function (req, res) {
+    getRosterUpdateIds(ROSTER_UPDATE_URL, res);
 });
 
 app.get('/scrapeImageId', function (req, res) {
@@ -111,6 +117,40 @@ function getPlayerIdsByCountries(countries, index) {
             console.log('Finished!');
         }
     });
+}
+
+function getRosterUpdateIds(url, res) {
+    request({
+        url: url,
+        proxy: 'http://192.168.78.7:8888'
+    }, function (error, response, html) {
+        if (!error) {
+            let playerIds = parseRosterUpdateIds(html);
+
+            console.log('Finished!');
+            res.send(playerIds);
+
+        } else {
+            console.log('Can not get roster update');
+            res.send('Error');
+        }
+    });
+}
+
+function parseRosterUpdateIds(html) {
+    let $ = cheerio.load(html);
+    let playerIds = [];
+
+    $('.player_list.table .table-row').not('.thead').each(function (i, el) {
+        let $el = $(el),
+            href = $el.find('.player_link').attr('href'),
+            extractedId = href.substring(href.indexOf('=') + 1);
+        if (extractedId) {
+            playerIds.push(extractedId);
+        }
+    });
+
+    return playerIds;
 }
 
 function getPlayerIds(url, outputFileName, callback) {
