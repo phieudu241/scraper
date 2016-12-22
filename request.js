@@ -10,16 +10,16 @@ var CONSTANTS = require('./constants');
 var app = express();
 
 var BASE_PLAYER_URL = "http://en.fifaaddict.com/fo3player.php?id=";
-var SEARCH_BY_SEASON_URL = "http://en.fifaaddict.com/fo3db.php?q=player&limit=500&player&season=";
+var SEARCH_BY_SEASON_URL = "http://en.fifaaddict.com/fo3db.php?q=player&limit=500&ability=overallrating_70&season=";
 // Just get id for player overallrating >= 70
 var SEARCH_BY_COUNTRY_URL = "http://en.fifaaddict.com/fo3db.php?q=player&limit=500&player&ability=overallrating_70&nation=";
 var LIVEBOOST_URL = "http://en.fifaaddict.com/fo3db.php?q=player&ability=overallrating_70&liveboost=yes&limit=500";
 var FIFA_NET_PLAYER_URL = "http://fifanet.kr/player/player.fifanet?spid=";
 var ROSTER_UPDATE_URL = "http://en.fifaaddict.com/roster_update_2016_second_half.php";
 
-var SCAPE_INPUT_FILE = './input/test.txt';
-var SCAPE_OUTPUT_FILE = './output/test.json';
-var SCAPE_OUTPUT_LOG_FILE = './output/test.txt';
+var SCAPE_INPUT_FILE = './input/2015.txt';
+var SCAPE_OUTPUT_FILE = './output/2015.json';
+var SCAPE_OUTPUT_LOG_FILE = './output/2015_log.txt';
 
 var SCAPE_IMAGEID_INTPUT_FILE = './input/scanImageIds.txt';
 var SCAPE_IMAGEID_OUTPUT_FILE = './output/image_id.txt';
@@ -33,6 +33,10 @@ var SEARCH_BY_COUNTRY_OUTPUT_FILE = "./output/playerIdsByCountry.txt";
 var SEARCH_BY_COUNTRY_OUTPUT_FILE_NAME = "playerIdsByCountry";
 var CONVERT_JSON_INPUT_FILE = './output/test.json';
 var CONVERT_CSV_OUTPUT_FILE = './output/test.csv';
+
+//var USE_PROXY = true;
+//var PROXY = '';
+var PROXY = 'http://192.168.78.7:8888';
 
 app.set('port', (process.env.PORT || 5000));
 
@@ -91,7 +95,10 @@ app.listen(app.get('port'), function() {
 });
 
 function getLiveBoost(res) {
-    request(LIVEBOOST_URL, function (error, response, html) {
+    request({
+        url: LIVEBOOST_URL,
+        proxy: PROXY
+    }, function (error, response, html) {
         if (!error) {
             var liveBoostInfo = parseLiveBoost(html);
             if (liveBoostInfo) {
@@ -122,7 +129,7 @@ function getPlayerIdsByCountries(countries, index) {
 function getRosterUpdateIds(url, res) {
     request({
         url: url,
-        proxy: 'http://192.168.78.7:8888'
+        proxy: PROXY
     }, function (error, response, html) {
         if (!error) {
             let playerIds = parseRosterUpdateIds(html);
@@ -154,7 +161,10 @@ function parseRosterUpdateIds(html) {
 }
 
 function getPlayerIds(url, outputFileName, callback) {
-    request(url, function (error, response, html) {
+    request({
+        url: url,
+        proxy: PROXY
+    }, function (error, response, html) {
         if (!error) {
             let playerIds = parsePlayerIds(html);
 
@@ -167,7 +177,6 @@ function getPlayerIds(url, outputFileName, callback) {
             } else {
                 console.log('Finished!');
             }
-
         } else {
             console.log('Get error for search with reason: ' + outputFileName);
             if (callback) {
@@ -241,7 +250,10 @@ function getPlayer(playerIds, index, fs) {
         next('Comment', playerId, playerIds, index, fs);
     } else {
         let url = BASE_PLAYER_URL + playerId;
-        request(url, function (error, response, html) {
+        request({
+            url: url,
+            proxy: PROXY
+        }, function (error, response, html) {
             if (!error) {
                 let player = parsePlayer(html, playerId);
 
@@ -269,7 +281,10 @@ function getImageId(playerIds, index, fs) {
         next('Comment', playerId, playerIds, index, fs);
     } else {
         let url = BASE_PLAYER_URL + playerId;
-        request(url, function (error, response, html) {
+        request({
+            url: url,
+            proxy: PROXY
+        }, function (error, response, html) {
             if (!error) {
                 let imageId = parseImageId(html, playerId);
 
@@ -297,7 +312,10 @@ function getKoreanName(playerIds, index, fs) {
         next('Comment', playerId, playerIds, index, fs);
     } else {
         let url = FIFA_NET_PLAYER_URL + playerId;
-        request(url, function (error, response, html) {
+        request({
+            url: url,
+            proxy: PROXY
+        }, function (error, response, html) {
             if (!error) {
                 let name = parseKoreanName(html, playerId);
 
