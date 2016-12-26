@@ -458,7 +458,6 @@ function parsePlayer(html, playerId) {
     player['imageid'] = smallImageUrl.substring(smallImageUrl.lastIndexOf('/') + 2, smallImageUrl.indexOf('png') - 1);
 
     // Get player attributes
-    player['overallrating'] = parsePlayerAttribute('overallrating', data.player_position.overallrating);
     let perfcon = '';
 
     for (var property in data.player_stat) {
@@ -479,110 +478,116 @@ function parsePlayer(html, playerId) {
     player['perfcon_kr'] = getLanguageMapping(LANGUAGE_MAPPING.PERF_CON, player['perfcon'], 'kr');
     player['perfcon_th'] = getLanguageMapping(LANGUAGE_MAPPING.PERF_CON, player['perfcon'], 'th');
 
-    
-    //let $nameEl = $f3playerTopInfo.find('.player_info_list.player_name a');
-    // // name
-    //let playerName = $nameEl.text().trim();
-    //let plusIndex = playerName.indexOf("+");
+    let $playerName = cheerio.load(data.player_name);
+    // name
+    player['fullname'] = $playerName.find('b.fullname').text().trim();
+    player['shortname'] = $playerName.find('b.tname').text().trim();
+    //player['shortname'] = getShortname(playerName);
 
-    // if (plusIndex > -1) {
-    //     playerName = playerName.substring(0, plusIndex);
-    // }
-    //
-    // player['fullname'] = playerName;
-    // player['shortname'] = getShortname(playerName);
-    //
-    // // badged
-    // player['badged'] = $nameEl.find('span').attr('class');
-    // // season
-    // let seasonHref = $f3playerTopInfo.find('.team_color_label_wrapper .team_color_label.label_season').attr('href');
-    // player['season'] = getValueFromHref(seasonHref, 'season');
-    //
-    // // league (giai dau)
-    // let leagueHref = $('.fobreadcrumb').find('li').last().find('a').attr('href');
-    // player['league'] = getValueFromHref(leagueHref, 'league');
-    //
-    // // positions
-    // let positions = {};
-    // let $positions = $f3playerTopInfo.find('.player_info_list.player_position');
-    //
-    // $positions.find('.player_position_list').each(function (i, el) {
-    //     let $this = $(el);
-    //     positions[$this.find('.badge_position').text()] = getLevel1($this.find('.stat_value').text());
-    //
-    //     if ($this.attr('class').indexOf('player_position_active') > -1) {
-    //         player['overallrating'] = parsePlayerAttribute('overallrating', $this.find('.stat_value').text());
-    //     }
-    // });
-    //
-    // player['positions'] = positions;
-    //
-    // // skillmoves
-    // player['skillmoves'] = $f3playerTopInfo.find('.player_info_list.player_skillmoves i').length;
-    //
-    // // nation
-    // player['nation'] = $f3playerTopInfo.find('.player_nation b').text();
-    // // club
-    // player['club'] = $f3playerTopInfo.find('.player_club b').text();
-    //
-    // // birthday
-    // let $values = $($f3playerTopInfo.find('.player_info_list')[2]).find('b');
-    // player['birthday'] = $($values[0]).text();
-    // player['height'] = $($values[1]).text();
-    // player['weight'] = $($values[2]).text();
-    //
-    // player['leftfoot'] = $f3playerTopInfo.find('.leftfoot').text().trim();
-    // player['rightfoot'] = $f3playerTopInfo.find('.rightfoot').text().trim();
-    //
-    // // attack/defence
-    // let $playerStatInner = $('.player_stat_inner');
-    // player['attack'] = $playerStatInner.find('.workrate .att b').text();
-    // player['defence'] = $playerStatInner.find('.workrate .def b').text();
+    // badged
+    player['badged'] = $playerName.find('.badged').attr('class');
+    // season
+    //let seasonHref = $f3playerTopInfo.find('.team_color_label_wrapper .team_color_label.label_season').attr('href');
+    //player['season'] = getValueFromHref(seasonHref, 'season');
+    // TODO lack of this info. Using hardcode for current season
+    player['season'] = '2016';
 
-    //speciality
-    // let speciality = [];
-    // let speciality_vn = [];
-    // let speciality_cn = [];
-    // let speciality_kr = [];
-    //
-    // let $traits = $playerStatInner.find('.trait.speciality.sm');
-    // $traits.find('b').each(function (i, el) {
-    //     let value = $(el).text().trim();
-    //     speciality.push(value);
-    //     speciality_vn.push(getLanguageMapping(LANGUAGE_MAPPING.SPECIALITIES, value, 'vn'));
-    //     speciality_cn.push(getLanguageMapping(LANGUAGE_MAPPING.SPECIALITIES, value, 'cn'));
-    //     speciality_kr.push(getLanguageMapping(LANGUAGE_MAPPING.SPECIALITIES, value, 'kr'));
-    // });
-    // player['speciality'] = speciality;
-    // player['speciality_vn'] = speciality_vn;
-    // player['speciality_cn'] = speciality_cn;
-    // player['speciality_kr'] = speciality_kr;
-    //
-    // //trait
-    // let hiddenScore = [];
-    // let hiddenScore_vn = [];
-    // let hiddenScore_cn = [];
-    // let hiddenScore_kr = [];
-    // $playerStatInner.find('.trait.sm').not('.speciality').find('b').each(function (i, el) {
-    //     let hiddenAttr = $(el).text().trim();
-    //     hiddenScore.push(hiddenAttr);
-    //     hiddenScore_vn.push(getLanguageMapping(LANGUAGE_MAPPING.HIDDEN_STATS, hiddenAttr, 'vn'));
-    //     hiddenScore_cn.push(getLanguageMapping(LANGUAGE_MAPPING.HIDDEN_STATS, hiddenAttr, 'cn'));
-    //     hiddenScore_kr.push(getLanguageMapping(LANGUAGE_MAPPING.HIDDEN_STATS, hiddenAttr, 'kr'));
-    // });
-    // player['hidden_score'] = hiddenScore;
-    // player['hidden_score_vn'] = hiddenScore_vn;
-    // player['hidden_score_cn'] = hiddenScore_cn;
-    // player['hidden_score_kr'] = hiddenScore_kr;
-    //
-    // //liveboost
-    // player['isliveboost'] = '';
-    // player['boostvalue'] = '';
+    // TODO lack of this info
+    // league (giai dau)
+    //let leagueHref = $('.fobreadcrumb').find('li').last().find('a').attr('href');
+    //player['league'] = getValueFromHref(leagueHref, 'league');
+
+    // positions
+    player['overallrating'] = parsePlayerAttribute('overallrating', data.player_position.overallrating);
+    let positions = {};
+    let positions_recom = data.position_recom.split(',');
+
+    positions_recom.forEach(function (item) {
+        let positionKey = item.substring(1);
+        positions[positionKey] = data.player_position[positionKey];
+    });
+
+    player['positions'] = positions;
+
+    // skillmoves
+    let $skillmoves = cheerio.load(data.player_skillmoves);
+    player['skillmoves'] = $skillmoves.find('.player_skillmoves i').length;
+
+    let $playerInfo = cheerio.load('<div></div>');
+    $playerInfo.append(data.player_info);
+    // nation
+    player['nation'] = $playerInfo.find('.player_nation b').text();
+    // club
+    player['club'] = $playerInfo.find('.player_club b').text();
+
+    // birthday
+    let $values = $($playerInfo.find('.player_info_list')[2]).find('b');
+    let birthday = $($values[0]).text();
+    player['birthday'] = updateBirthday(birthday);
+    player['height'] = $($values[2]).text();
+    player['weight'] = $($values[4]).text();
+
+    let $statFoot = cheerio.load(data.stat_foot);
+    player['leftfoot'] = $statFoot.filter('.leftfoot').text().trim();
+    player['rightfoot'] = $statFoot.filter('.rightfoot').text().trim();
+
+    // attack/defence
+    let $formationMap = cheerio.load(data.formation_map);
+    player['attack'] = $formationMap.find('.workrate .att b').text();
+    player['defence'] = $formationMap.find('.workrate .def b').text();
+
+    // speciality & hidden
+    let $trait = cheerio.load(data.trait);
+
+    // speciality
+    let speciality = [];
+    let speciality_vn = [];
+    let speciality_cn = [];
+    let speciality_kr = [];
+
+    let $speciality = $trait.filter('.trait.speciality.sm');
+    $speciality.find('b').each(function (i, el) {
+        let value = $(el).text().trim();
+        speciality.push(value);
+        speciality_vn.push(getLanguageMapping(LANGUAGE_MAPPING.SPECIALITIES, value, 'vn'));
+        speciality_cn.push(getLanguageMapping(LANGUAGE_MAPPING.SPECIALITIES, value, 'cn'));
+        speciality_kr.push(getLanguageMapping(LANGUAGE_MAPPING.SPECIALITIES, value, 'kr'));
+    });
+    player['speciality'] = speciality;
+    player['speciality_vn'] = speciality_vn;
+    player['speciality_cn'] = speciality_cn;
+    player['speciality_kr'] = speciality_kr;
+
+    //trait
+    let hiddenScore = [];
+    let hiddenScore_vn = [];
+    let hiddenScore_cn = [];
+    let hiddenScore_kr = [];
+    $trait.not('.speciality').find('b').each(function (i, el) {
+        let hiddenAttr = $(el).text().trim();
+        hiddenScore.push(hiddenAttr);
+        hiddenScore_vn.push(getLanguageMapping(LANGUAGE_MAPPING.HIDDEN_STATS, hiddenAttr, 'vn'));
+        hiddenScore_cn.push(getLanguageMapping(LANGUAGE_MAPPING.HIDDEN_STATS, hiddenAttr, 'cn'));
+        hiddenScore_kr.push(getLanguageMapping(LANGUAGE_MAPPING.HIDDEN_STATS, hiddenAttr, 'kr'));
+    });
+    player['hidden_score'] = hiddenScore;
+    player['hidden_score_vn'] = hiddenScore_vn;
+    player['hidden_score_cn'] = hiddenScore_cn;
+    player['hidden_score_kr'] = hiddenScore_kr;
+
+    //liveboost
+    player['isliveboost'] = '';
+    player['boostvalue'] = '';
         
 
     console.log(player ? 'OK' : player);
 
     return player;
+}
+
+function updateBirthday(birthday) {
+    let yearOld = birthday.substring(birthday.indexOf('(') + 1, birthday.indexOf(')'));
+    return (parseInt(yearOld) + 1).toString();
 }
 
 function parseImageId(html) {
