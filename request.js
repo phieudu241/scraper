@@ -18,7 +18,7 @@ var LIVEBOOST_URL = "http://en.fifaaddict.com/fo3db.php?q=player&ability=overall
 var FIFA_NET_PLAYER_URL = "http://fifanet.kr/player/player.fifanet?spid=";
 var ROSTER_UPDATE_URL = "http://en.fifaaddict.com/roster_update_2016_second_half.php";
 
-var SCAPE_INPUT_FILE = './input/2016.txt';
+var SCAPE_INPUT_FILE = './input/2016_1.txt';
 var SCAPE_OUTPUT_FILE = './output/2016.json';
 var SCAPE_OUTPUT_LOG_FILE = './output/2016_log.txt';
 
@@ -32,8 +32,8 @@ var SCAPE_KOREAN_NAME_OUTPUT_LOG_FILE = './output/Korean_Names_log.txt';
 
 var SEARCH_BY_COUNTRY_OUTPUT_FILE = "./output/playerIdsByCountry.txt";
 var SEARCH_BY_COUNTRY_OUTPUT_FILE_NAME = "playerIdsByCountry";
-var CONVERT_JSON_INPUT_FILE = './output/test.json';
-var CONVERT_CSV_OUTPUT_FILE = './output/test.csv';
+var CONVERT_JSON_INPUT_FILE = './output/2016.json';
+var CONVERT_CSV_OUTPUT_FILE = './output/2016.csv';
 
 //var USE_PROXY = true;
 var PROXY = '';
@@ -454,7 +454,7 @@ function parsePlayer(html, playerId) {
 
     // imageid
     let $f3playerImgCell = cheerio.load(data.player_img_cell);
-    let smallImageUrl = $f3playerImgCell.find('.player_img').attr('src');
+    let smallImageUrl = $f3playerImgCell('.player_img').attr('src');
     player['imageid'] = smallImageUrl.substring(smallImageUrl.lastIndexOf('/') + 2, smallImageUrl.indexOf('png') - 1);
 
     // Get player attributes
@@ -480,12 +480,12 @@ function parsePlayer(html, playerId) {
 
     let $playerName = cheerio.load(data.player_name);
     // name
-    player['fullname'] = $playerName.find('b.fullname').text().trim();
-    player['shortname'] = $playerName.find('b.tname').text().trim();
+    player['fullname'] = $playerName('b.fullname').text().trim();
+    player['shortname'] = $playerName('b.tname').text().trim();
     //player['shortname'] = getShortname(playerName);
 
     // badged
-    player['badged'] = $playerName.find('.badged').attr('class');
+    player['badged'] = $playerName('.badged').attr('class');
     // season
     //let seasonHref = $f3playerTopInfo.find('.team_color_label_wrapper .team_color_label.label_season').attr('href');
     //player['season'] = getValueFromHref(seasonHref, 'season');
@@ -496,6 +496,7 @@ function parsePlayer(html, playerId) {
     // league (giai dau)
     //let leagueHref = $('.fobreadcrumb').find('li').last().find('a').attr('href');
     //player['league'] = getValueFromHref(leagueHref, 'league');
+    player['league'] = '';
 
     // positions
     player['overallrating'] = parsePlayerAttribute('overallrating', data.player_position.overallrating);
@@ -504,37 +505,37 @@ function parsePlayer(html, playerId) {
 
     positions_recom.forEach(function (item) {
         let positionKey = item.substring(1);
-        positions[positionKey] = data.player_position[positionKey];
+        positions[positionKey] = getLevel1(data.player_position[positionKey]);
     });
 
     player['positions'] = positions;
 
     // skillmoves
     let $skillmoves = cheerio.load(data.player_skillmoves);
-    player['skillmoves'] = $skillmoves.find('.player_skillmoves i').length;
+    player['skillmoves'] = $skillmoves('.player_skillmoves i').length;
 
-    let $playerInfo = cheerio.load('<div></div>');
-    $playerInfo.append(data.player_info);
+    let $playerInfo = cheerio.load(data.player_info);
+    //$playerInfo.append(data.player_info);
     // nation
-    player['nation'] = $playerInfo.find('.player_nation b').text();
+    player['nation'] = $playerInfo('.player_nation b').text();
     // club
-    player['club'] = $playerInfo.find('.player_club b').text();
+    player['club'] = $playerInfo('.player_club b').text();
 
     // birthday
-    let $values = $($playerInfo.find('.player_info_list')[2]).find('b');
-    let birthday = $($values[0]).text();
+    let $values = $playerInfo($playerInfo('.player_info_list')[2]).find('b');
+    let birthday = $playerInfo($values[0]).text();
     player['birthday'] = updateBirthday(birthday);
-    player['height'] = $($values[2]).text();
-    player['weight'] = $($values[4]).text();
+    player['height'] = $playerInfo($values[2]).text();
+    player['weight'] = $playerInfo($values[4]).text();
 
     let $statFoot = cheerio.load(data.stat_foot);
-    player['leftfoot'] = $statFoot.filter('.leftfoot').text().trim();
-    player['rightfoot'] = $statFoot.filter('.rightfoot').text().trim();
+    player['leftfoot'] = $statFoot('.leftfoot').text().trim();
+    player['rightfoot'] = $statFoot('.rightfoot').text().trim();
 
     // attack/defence
     let $formationMap = cheerio.load(data.formation_map);
-    player['attack'] = $formationMap.find('.workrate .att b').text();
-    player['defence'] = $formationMap.find('.workrate .def b').text();
+    player['attack'] = $formationMap('.workrate .att b').text();
+    player['defence'] = $formationMap('.workrate .def b').text();
 
     // speciality & hidden
     let $trait = cheerio.load(data.trait);
@@ -545,9 +546,9 @@ function parsePlayer(html, playerId) {
     let speciality_cn = [];
     let speciality_kr = [];
 
-    let $speciality = $trait.filter('.trait.speciality.sm');
+    let $speciality = $trait('.trait.speciality.sm');
     $speciality.find('b').each(function (i, el) {
-        let value = $(el).text().trim();
+        let value = $trait(el).text().trim();
         speciality.push(value);
         speciality_vn.push(getLanguageMapping(LANGUAGE_MAPPING.SPECIALITIES, value, 'vn'));
         speciality_cn.push(getLanguageMapping(LANGUAGE_MAPPING.SPECIALITIES, value, 'cn'));
@@ -563,8 +564,8 @@ function parsePlayer(html, playerId) {
     let hiddenScore_vn = [];
     let hiddenScore_cn = [];
     let hiddenScore_kr = [];
-    $trait.not('.speciality').find('b').each(function (i, el) {
-        let hiddenAttr = $(el).text().trim();
+    $trait('.trait.sm').not('.speciality').find('b').each(function (i, el) {
+        let hiddenAttr = $trait(el).text().trim();
         hiddenScore.push(hiddenAttr);
         hiddenScore_vn.push(getLanguageMapping(LANGUAGE_MAPPING.HIDDEN_STATS, hiddenAttr, 'vn'));
         hiddenScore_cn.push(getLanguageMapping(LANGUAGE_MAPPING.HIDDEN_STATS, hiddenAttr, 'cn'));
@@ -587,7 +588,7 @@ function parsePlayer(html, playerId) {
 
 function updateBirthday(birthday) {
     let yearOld = birthday.substring(birthday.indexOf('(') + 1, birthday.indexOf(')'));
-    return (parseInt(yearOld) + 1).toString();
+    return birthday.substring(0, birthday.indexOf('(') + 1)  + (parseInt(yearOld) + 1).toString() + ')';
 }
 
 function parseImageId(html) {
