@@ -32,7 +32,7 @@ var SCAPE_KOREAN_NAME_OUTPUT_LOG_FILE = './output/Korean_Names_log.txt';
 
 var SEARCH_BY_COUNTRY_OUTPUT_FILE = "./output/playerIdsByCountry.txt";
 var SEARCH_BY_COUNTRY_OUTPUT_FILE_NAME = "playerIdsByCountry";
-var CONVERT_JSON_INPUT_FILE = './output/2016.json';
+var CONVERT_JSON_INPUT_FILE = './output/2016_fixed.json';
 var CONVERT_CSV_OUTPUT_FILE = './output/2016.csv';
 
 //var USE_PROXY = true;
@@ -89,6 +89,11 @@ app.get('/getPlayerIdsByCountries', function (req, res) {
 
 app.get('/convert', function (req, res) {
     convertJsonToCsv(CONVERT_JSON_INPUT_FILE, CONVERT_CSV_OUTPUT_FILE);
+    res.send('Doing....');
+});
+
+app.get('/fixJson', function (req, res) {
+    fixJsonForGK(CONVERT_JSON_INPUT_FILE);
     res.send('Doing....');
 });
 
@@ -505,7 +510,11 @@ function parsePlayer(html, playerId) {
 
     positions_recom.forEach(function (item) {
         let positionKey = item.substring(1);
-        positions[positionKey] = getLevel1(data.player_position[positionKey]);
+        if (positionKey == 'gk') {
+            positions[positionKey] = player['overallrating'];
+        } else {
+            positions[positionKey] = getLevel1(data.player_position[positionKey]);
+        }
     });
 
     player['positions'] = positions;
@@ -703,6 +712,25 @@ function convertJsonToCsv(jsonFile, csvFile) {
 
         fs.appendFileSync(csvFile, dataRow.join(',') + "\r\n");
     }
+
+    console.log('Finished!');
+}
+
+function fixJsonForGK(jsonFile) {
+    var playersStr = fs.readFileSync(jsonFile).toString();
+    var players = {};
+    if (playersStr != undefined && playersStr.trim() != '') {
+        players = JSON.parse(playersStr);
+    }
+
+    for (var playerId in players) {
+        var playerInfo = players[playerId];
+        if (playerInfo.positions.gk) {
+            playerInfo.positions.gk = playerInfo.overallrating;
+        }
+    }
+
+    fs.writeFileSync(jsonFile, JSON.stringify(players));
 
     console.log('Finished!');
 }
