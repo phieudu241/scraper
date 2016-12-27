@@ -18,7 +18,7 @@ var LIVEBOOST_URL = "http://en.fifaaddict.com/fo3db.php?q=player&ability=overall
 var FIFA_NET_PLAYER_URL = "http://fifanet.kr/player/player.fifanet?spid=";
 var ROSTER_UPDATE_URL = "http://en.fifaaddict.com/roster_update_2016_second_half.php";
 
-var SCAPE_INPUT_FILE = './input/2016_1.txt';
+var SCAPE_INPUT_FILE = './input/2016.txt';
 var SCAPE_OUTPUT_FILE = './output/2016.json';
 var SCAPE_OUTPUT_LOG_FILE = './output/2016_log.txt';
 
