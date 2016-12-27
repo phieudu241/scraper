@@ -154,7 +154,7 @@ module.exports = Object.freeze({
         },
         'Sharp curling shot': {
             'vn': 'Sút xoáy',
-            'cn': 'a搓射高手',
+            'cn': '搓射高手',
             'kr': '예리한 감아차기'
         },
         'Short tempered': {
