@@ -445,7 +445,7 @@ function getLeague(playerIds, index, fs) {
 function nextLeague(type, playerId, playerIds, index, fs) {
     console.log(index);
     if (type != 'Comment') {
-        fs.appendFileSync(SCAPE_LEAGUE_OUTPUT_FILE, playerId.toString() + type + "\r\n");
+        fs.appendFileSync(SCAPE_LEAGUE_OUTPUT_LOG_FILE, playerId.toString() + type + "\r\n");
     }
 
     if (index++ < (playerIds.length - 1)) {
