@@ -22,6 +22,10 @@ var SCAPE_INPUT_FILE = './input/2016.txt';
 var SCAPE_OUTPUT_FILE = './output/2016.json';
 var SCAPE_OUTPUT_LOG_FILE = './output/2016_log.txt';
 
+var SCAPE_LEAGUE_INTPUT_FILE = './input/scanImageIds.txt';
+var SCAPE_LEAGUE_OUTPUT_FILE = './output/image_id.txt';
+var SCAPE_LEAGUE_OUTPUT_LOG_FILE = './output/image_id_log.txt';
+
 var SCAPE_IMAGEID_INTPUT_FILE = './input/scanImageIds.txt';
 var SCAPE_IMAGEID_OUTPUT_FILE = './output/image_id.txt';
 var SCAPE_IMAGEID_OUTPUT_LOG_FILE = './output/image_id_log.txt';
@@ -62,6 +66,13 @@ app.get('/getRosterUpdateIds', function (req, res) {
 });
 
 app.get('/scrapeImageId', function (req, res) {
+    var playerIds = fs.readFileSync(SCAPE_LEAGUE_INTPUT_FILE).toString().split('\r\n');
+    var startIndex = 0;
+    getLeague(playerIds, startIndex, fs);
+    res.send('Doing....');
+});
+
+app.get('/scrapeLeague', function (req, res) {
     var playerIds = fs.readFileSync(SCAPE_IMAGEID_INTPUT_FILE).toString().split('\r\n');
     var startIndex = 0;
     getImageId(playerIds, startIndex, fs);
@@ -404,31 +415,55 @@ function getLeague(playerIds, index, fs) {
         // Ignore comment row
         next('Comment', playerId, playerIds, index, fs);
     } else {
-        let url = FIFA_NET_PLAYER_URL + playerId;
+        let url = BASE_PLAYER_URL + playerId;
         request({
             url: url,
             proxy: PROXY
         }, function (error, response, html) {
             if (!error) {
-                let name = parseKoreanName(html, playerId);
+                let league = parseLeague(html, playerId);
 
-                if (name) {
-                    // Write Korean Name here
-                    fs.appendFileSync(SCAPE_KOREAN_NAME_OUTPUT_FILE, playerId + '-' + name + "\r\n");
-                    nextKoreanName('', playerId, playerIds, index, fs);
+                if (league) {
+                    // Write league here
+                    fs.appendFileSync(SCAPE_LEAGUE_OUTPUT_FILE, playerId + '-' + name + "\r\n");
+                    nextLeague('', playerId, playerIds, index, fs);
                 } else {
                     console.log('Not Found');
-                    fs.appendFileSync(SCAPE_KOREAN_NAME_OUTPUT_FILE, playerId + '-' + 'Not Found' + "\r\n");
-                    nextKoreanName(' - Not Found', playerId, playerIds, index, fs);
+                    fs.appendFileSync(SCAPE_LEAGUE_OUTPUT_FILE, playerId + '-' + 'Not Found' + "\r\n");
+                    nextLeague(' - Not Found', playerId, playerIds, index, fs);
                 }
 
             } else {
                 console.log('Get error for player with id: ' + playerId);
-                fs.appendFileSync(SCAPE_KOREAN_NAME_OUTPUT_FILE, playerId + '-' + 'Error' + "\r\n");
-                nextKoreanName(' - Error', playerId, playerIds, index, fs);
+                fs.appendFileSync(SCAPE_LEAGUE_OUTPUT_FILE, playerId + '-' + 'Error' + "\r\n");
+                nextLeague(' - Error', playerId, playerIds, index, fs);
             }
         });
     }
+}
+
+function nextLeague(type, playerId, playerIds, index, fs) {
+    console.log(index);
+    if (type != 'Comment') {
+        fs.appendFileSync(SCAPE_LEAGUE_OUTPUT_FILE, playerId.toString() + type + "\r\n");
+    }
+
+    if (index++ < (playerIds.length - 1)) {
+        getLeague(playerIds, index, fs);
+    } else {
+        console.log('Finished!');
+    }
+}
+
+function parseLeague(html) {
+    var $ = cheerio.load(html),
+        league;
+
+    let leagueHref = $('.fobreadcrumb').find('li').last().find('a').attr('href');
+
+    if (leagueHref) league = getValueFromHref(leagueHref, 'league');
+    console.log(league ? 'OK' : league);
+    return league;
 }
 
 function writeJSON(playerId, player, fs) {
