@@ -35,9 +35,8 @@ var SEARCH_BY_COUNTRY_OUTPUT_FILE_NAME = "playerIdsByCountry";
 var CONVERT_JSON_INPUT_FILE = './output/2016_fixed.json';
 var CONVERT_CSV_OUTPUT_FILE = './output/2016.csv';
 
-//var USE_PROXY = true;
-var PROXY = '';
-//var PROXY = 'http://192.168.78.7:8888';
+//var PROXY = '';
+var PROXY = 'http://192.168.78.7:8888';
 
 app.set('port', (process.env.PORT || 5000));
 
@@ -365,6 +364,40 @@ function getImageId(playerIds, index, fs) {
 }
 
 function getKoreanName(playerIds, index, fs) {
+    let playerId = playerIds[index];
+
+    if (!playerId || playerId.trim() == '' || playerId.indexOf('//') > - 1 || playerId.indexOf('#') > - 1) {
+        // Ignore comment row
+        next('Comment', playerId, playerIds, index, fs);
+    } else {
+        let url = FIFA_NET_PLAYER_URL + playerId;
+        request({
+            url: url,
+            proxy: PROXY
+        }, function (error, response, html) {
+            if (!error) {
+                let name = parseKoreanName(html, playerId);
+
+                if (name) {
+                    // Write Korean Name here
+                    fs.appendFileSync(SCAPE_KOREAN_NAME_OUTPUT_FILE, playerId + '-' + name + "\r\n");
+                    nextKoreanName('', playerId, playerIds, index, fs);
+                } else {
+                    console.log('Not Found');
+                    fs.appendFileSync(SCAPE_KOREAN_NAME_OUTPUT_FILE, playerId + '-' + 'Not Found' + "\r\n");
+                    nextKoreanName(' - Not Found', playerId, playerIds, index, fs);
+                }
+
+            } else {
+                console.log('Get error for player with id: ' + playerId);
+                fs.appendFileSync(SCAPE_KOREAN_NAME_OUTPUT_FILE, playerId + '-' + 'Error' + "\r\n");
+                nextKoreanName(' - Error', playerId, playerIds, index, fs);
+            }
+        });
+    }
+}
+
+function getLeague(playerIds, index, fs) {
     let playerId = playerIds[index];
 
     if (!playerId || playerId.trim() == '' || playerId.indexOf('//') > - 1 || playerId.indexOf('#') > - 1) {
