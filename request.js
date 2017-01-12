@@ -39,8 +39,8 @@ var SEARCH_BY_COUNTRY_OUTPUT_FILE_NAME = "playerIdsByCountry";
 var CONVERT_JSON_INPUT_FILE = './output/2016_fixed.json';
 var CONVERT_CSV_OUTPUT_FILE = './output/2016.csv';
 
-//var PROXY = '';
-var PROXY = 'http://192.168.78.7:8888';
+var PROXY = '';
+//var PROXY = 'http://192.168.78.7:8888';
 
 app.set('port', (process.env.PORT || 5000));
 
