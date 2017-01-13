@@ -18,13 +18,13 @@ var LIVEBOOST_URL = "http://en.fifaaddict.com/fo3db.php?q=player&ability=overall
 var FIFA_NET_PLAYER_URL = "http://fifanet.kr/player/player.fifanet?spid=";
 var ROSTER_UPDATE_URL = "http://en.fifaaddict.com/roster_update_2016_second_half.php";
 
-var SCAPE_INPUT_FILE = './input/2016.txt';
-var SCAPE_OUTPUT_FILE = './output/2016.json';
-var SCAPE_OUTPUT_LOG_FILE = './output/2016_log.txt';
+var SCAPE_INPUT_FILE = './input/lp.txt';
+var SCAPE_OUTPUT_FILE = './output/lp.json';
+var SCAPE_OUTPUT_LOG_FILE = './output/lp_log.txt';
 
-var SCAPE_LEAGUE_INTPUT_FILE = './input/scanImageIds.txt';
-var SCAPE_LEAGUE_OUTPUT_FILE = './output/image_id.txt';
-var SCAPE_LEAGUE_OUTPUT_LOG_FILE = './output/image_id_log.txt';
+var SCAPE_LEAGUE_INTPUT_FILE = './input/lp.txt';
+var SCAPE_LEAGUE_OUTPUT_FILE = './output/lp_league.txt';
+var SCAPE_LEAGUE_OUTPUT_LOG_FILE = './output/lp_league_log.txt';
 
 var SCAPE_IMAGEID_INTPUT_FILE = './input/scanImageIds.txt';
 var SCAPE_IMAGEID_OUTPUT_FILE = './output/image_id.txt';
@@ -66,14 +66,14 @@ app.get('/getRosterUpdateIds', function (req, res) {
     getRosterUpdateIds(ROSTER_UPDATE_URL, res);
 });
 
-app.get('/scrapeImageId', function (req, res) {
+app.get('/scrapeLeague', function (req, res) {
     var playerIds = fs.readFileSync(SCAPE_LEAGUE_INTPUT_FILE).toString().split('\r\n');
     var startIndex = 0;
     getLeague(playerIds, startIndex, fs);
     res.send('Doing....');
 });
 
-app.get('/scrapeLeague', function (req, res) {
+app.get('/scrapeImageId', function (req, res) {
     var playerIds = fs.readFileSync(SCAPE_IMAGEID_INTPUT_FILE).toString().split('\r\n');
     var startIndex = 0;
     getImageId(playerIds, startIndex, fs);
@@ -426,7 +426,7 @@ function getLeague(playerIds, index, fs) {
 
                 if (league) {
                     // Write league here
-                    fs.appendFileSync(SCAPE_LEAGUE_OUTPUT_FILE, playerId + '-' + name + "\r\n");
+                    fs.appendFileSync(SCAPE_LEAGUE_OUTPUT_FILE, playerId + '-' + league + "\r\n");
                     nextLeague('', playerId, playerIds, index, fs);
                 } else {
                     console.log('Not Found');
