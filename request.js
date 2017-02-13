@@ -22,9 +22,9 @@ var SCAPE_INPUT_FILE = './input/lp.txt';
 var SCAPE_OUTPUT_FILE = './output/lp.json';
 var SCAPE_OUTPUT_LOG_FILE = './output/lp_log.txt';
 
-var SCAPE_LEAGUE_INTPUT_FILE = './input/lp.txt';
-var SCAPE_LEAGUE_OUTPUT_FILE = './output/lp_league.txt';
-var SCAPE_LEAGUE_OUTPUT_LOG_FILE = './output/lp_league_log.txt';
+var SCAPE_LEAGUE_INTPUT_FILE = './input/2016.txt';
+var SCAPE_LEAGUE_OUTPUT_FILE = './output/2016_league.txt';
+var SCAPE_LEAGUE_OUTPUT_LOG_FILE = './output/2016_league_log.txt';
 
 var SCAPE_IMAGEID_INTPUT_FILE = './input/scanImageIds.txt';
 var SCAPE_IMAGEID_OUTPUT_FILE = './output/image_id.txt';
@@ -36,8 +36,8 @@ var SCAPE_KOREAN_NAME_OUTPUT_LOG_FILE = './output/Korean_Names_log.txt';
 
 var SEARCH_BY_COUNTRY_OUTPUT_FILE = "./output/playerIdsByCountry.txt";
 var SEARCH_BY_COUNTRY_OUTPUT_FILE_NAME = "playerIdsByCountry";
-var CONVERT_JSON_INPUT_FILE = './output/2016_fixed.json';
-var CONVERT_CSV_OUTPUT_FILE = './output/2016.csv';
+var CONVERT_JSON_INPUT_FILE = './output/lp.json';
+var CONVERT_CSV_OUTPUT_FILE = './output/lp.csv';
 
 var PROXY = '';
 //var PROXY = 'http://192.168.78.7:8888';
@@ -426,7 +426,7 @@ function getLeague(playerIds, index, fs) {
 
                 if (league) {
                     // Write league here
-                    fs.appendFileSync(SCAPE_LEAGUE_OUTPUT_FILE, playerId + '-' + league + "\r\n");
+                    fs.appendFileSync(SCAPE_LEAGUE_OUTPUT_FILE, playerId + '_' + league + "\r\n");
                     nextLeague('', playerId, playerIds, index, fs);
                 } else {
                     console.log('Not Found');
@@ -564,7 +564,7 @@ function parsePlayer(html, playerId) {
     //let seasonHref = $f3playerTopInfo.find('.team_color_label_wrapper .team_color_label.label_season').attr('href');
     //player['season'] = getValueFromHref(seasonHref, 'season');
     // TODO lack of this info. Using hardcode for current season
-    player['season'] = '2016';
+    player['season'] = 'lp';
 
     // TODO lack of this info
     // league (giai dau)
