@@ -16,11 +16,11 @@ var SEARCH_BY_SEASON_URL = "http://en.fifaaddict.com/fo3db.php?q=player&limit=50
 var SEARCH_BY_COUNTRY_URL = "http://en.fifaaddict.com/fo3db.php?q=player&limit=500&player&ability=overallrating_70&nation=";
 var LIVEBOOST_URL = "http://en.fifaaddict.com/fo3db.php?q=player&ability=overallrating_70&liveboost=yes&limit=500";
 var FIFA_NET_PLAYER_URL = "http://fifanet.kr/player/player.fifanet?spid=";
-var ROSTER_UPDATE_URL = "http://en.fifaaddict.com/roster_update_2016_second_half.php";
+var ROSTER_UPDATE_URL = "http://en.fifaaddict.com/roster_update_2017_firsthalf.php";
 
-var SCAPE_INPUT_FILE = './input/xi.txt';
-var SCAPE_OUTPUT_FILE = './output/xi.json';
-var SCAPE_OUTPUT_LOG_FILE = './output/xi_log.txt';
+var SCAPE_INPUT_FILE = './input/RyanGiggs_And_Friends.txt';
+var SCAPE_OUTPUT_FILE = './output/Giggs.json';
+var SCAPE_OUTPUT_LOG_FILE = './output/Giggs.txt';
 
 var SCAPE_LEAGUE_INTPUT_FILE = './input/2016.txt';
 var SCAPE_LEAGUE_OUTPUT_FILE = './output/2016_league.txt';
@@ -36,8 +36,8 @@ var SCAPE_KOREAN_NAME_OUTPUT_LOG_FILE = './output/Korean_Names_log.txt';
 
 var SEARCH_BY_COUNTRY_OUTPUT_FILE = "./output/playerIdsByCountry.txt";
 var SEARCH_BY_COUNTRY_OUTPUT_FILE_NAME = "playerIdsByCountry";
-var CONVERT_JSON_INPUT_FILE = './output/xi.json';
-var CONVERT_CSV_OUTPUT_FILE = './output/xi.csv';
+var CONVERT_JSON_INPUT_FILE = './output/Giggs.json';
+var CONVERT_CSV_OUTPUT_FILE = './output/Giggs.csv';
 
 var PROXY = '';
 //var PROXY = 'http://192.168.78.7:8888';
