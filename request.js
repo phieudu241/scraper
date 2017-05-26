@@ -15,6 +15,8 @@ var SEARCH_BY_SEASON_URL = "http://en.fifaaddict.com/fo3db.php?q=player&limit=50
 // Just get id for player overallrating >= 70
 var SEARCH_BY_COUNTRY_URL = "http://en.fifaaddict.com/fo3db.php?q=player&limit=500&player&ability=overallrating_70&nation=";
 var LIVEBOOST_URL = "http://en.fifaaddict.com/fo3db.php?q=player&ability=overallrating_70&liveboost=yes&limit=500";
+var LIVEBOOST_NEXON_URL = "http://fifaonline3.nexon.com/community/common/search/liveboostsearch.aspx?n4WeekFo3=";
+var LIVEBOOST_NEXON_GET_WEEK_URL = "http://fifaonline3.nexon.com/community/square/list.aspx?n4ArticleCategorySN=4";
 var FIFA_NET_PLAYER_URL = "http://fifanet.kr/player/player.fifanet?spid=";
 var ROSTER_UPDATE_URL = "http://en.fifaaddict.com/roster_update_2017_firsthalf.php";
 
@@ -109,12 +111,50 @@ app.get('/fixJson', function (req, res) {
 });
 
 app.get('/getLiveBoost', function (req, res) {
-    getLiveBoost(res);
+    //getLiveBoost(res);
+    getLiveBoostCurrentWeekFromNexon(res, getLiveBoostFromNexon);
 });
 
 app.listen(app.get('port'), function() {
     console.log('Node app is running on port', app.get('port'));
 });
+
+function getLiveBoostCurrentWeekFromNexon(res, callblack) {
+    request({
+        url: LIVEBOOST_NEXON_GET_WEEK_URL,
+        proxy: PROXY
+    }, function (error, response, html) {
+        if (!error) {
+            let $ = cheerio.load(html),
+                week = $('#LiveBoostCurrentWeek').attr('value');
+            if (week) {
+                callblack(res, week);
+            } else {
+                res.send("error");
+            }
+        } else {
+            res.sendStatus(500);
+        }
+    });
+}
+
+function getLiveBoostFromNexon(res, week) {
+    request({
+        url: LIVEBOOST_NEXON_URL + week,//LIVEBOOST_URL
+        proxy: PROXY
+    }, function (error, response, html) {
+        if (!error) {
+            var liveBoostInfo = parseLiveBoostFromNexon(html);
+            if (liveBoostInfo) {
+                res.send(liveBoostInfo);
+            } else {
+                res.send("error");
+            }
+        } else {
+            res.sendStatus(500);
+        }
+    });
+}
 
 function getLiveBoost(res) {
     request({
@@ -274,6 +314,30 @@ function parseLiveBoost(html) {
                 let boostValue = $el.find('span.liveboost b').text();
                 if (boostValue) {
                     liveBoostInfo.push({id: extractedId, boost: boostValue});
+                }
+            }
+        });
+    }
+
+    return liveBoostInfo;
+}
+
+function parseLiveBoostFromNexon(html) {
+    let $ = cheerio.load(html);
+    let liveBoostInfo;
+
+    let $resultDiv = $('.country');
+    if ($resultDiv.length > 0) {
+        liveBoostInfo = [];
+
+        $resultDiv.find('li a strong.name').each(function (i, el) {
+            let $el = $(el),
+                extractedId = $el.attr('data-player-id'),
+                playerName = $el.text();
+            if (extractedId) {
+                let boostValue = $el.parent().find('span.boost span').text();
+                if (boostValue) {
+                    liveBoostInfo.push({id: extractedId, name: playerName, boost: boostValue});
                 }
             }
         });
