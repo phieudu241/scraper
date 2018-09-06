@@ -6,6 +6,7 @@ const cheerio = require('cheerio');
 const app = express();
 
 const LIVEBOOST_NEXON_URL = "http://fifaonline4.nexon.com/datacenter/PlayerList";
+const PRICE_NEXON_URL = "http://fifaonline4.nexon.com/datacenter/PlayerPriceGraph";
 
 const PROXY = '';
 //var PROXY = 'http://192.168.78.7:8888';
@@ -20,6 +21,10 @@ app.get('/test', function (req, res) {
 
 app.get('/getLiveBoost', function (req, res) {
     getLiveBoostFromNexon(res);
+});
+
+app.get('/getPrice/:playerId', function (req, res) {
+    getPrice(res, req.params.playerId, req.query.enchant);
 });
 
 app.listen(app.get('port'), function() {
@@ -40,7 +45,7 @@ function getLiveBoostFromNexon(res) {
     }, function (error, response, html) {
         if (!error) {
             console.log('HTML - OK');
-            var liveBoostInfo = parseLiveBoostFromNexon(html);
+            let liveBoostInfo = parseLiveBoostFromNexon(html);
             if (liveBoostInfo) {
                 res.send(liveBoostInfo);
             } else {
@@ -82,4 +87,53 @@ function parseLiveBoostFromNexon(html) {
     }
 
     return liveBoostInfo;
+}
+
+function getPrice(res, playerId, enchant = 1) {
+    console.log('playerId:', playerId);
+    request.post({
+        url: PRICE_NEXON_URL,
+        form: {
+            spid: playerId,
+            n1strong: enchant
+        },
+        proxy: PROXY
+    }, function (error, response, html) {
+        if (!error) {
+            console.log('HTML - OK');
+            let priceInfo = parsePrice(html);
+            if (priceInfo) {
+                res.send(priceInfo);
+            } else {
+                res.send("error");
+            }
+        } else {
+            res.sendStatus(500);
+        }
+    });
+}
+
+function parsePrice(html) {
+    let result = {};
+    let $ = cheerio.load(html);
+
+    // Get current price
+    result.currentPrice = $('.add_info strong').text().trim().replace(/\r\n/g, '');
+
+    // Get price chart json data
+    let script = $('script').toString();
+
+    //Remove all spaces
+    script = script.replace(/\s/g, '');
+    //Remove all new lines
+    script = script.replace(/\r\n/g, '');
+    //Remove invalid array elements
+    script = script.replace(/,]/g, ']');
+
+    let priceChartDataFilterReg = /{.+?(]})/;
+    let priceChartDataStr = script.match(priceChartDataFilterReg)[0];
+
+    result.priceChart = JSON.parse(priceChartDataStr);
+
+    return result;
 }
