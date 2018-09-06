@@ -15,6 +15,13 @@ app.set('port', (process.env.PORT || 5000));
 
 app.use(express.static('public'));
 
+app.use(function (req, res, next) {
+    // Enable CORS
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authentication");
+    next();
+});
+
 app.get('/test', function (req, res) {
     res.send('Hello');
 });
@@ -100,7 +107,6 @@ function getPrice(res, playerId, enchant = 1) {
         proxy: PROXY
     }, function (error, response, html) {
         if (!error) {
-            console.log('HTML - OK');
             let priceInfo = parsePrice(html);
             if (priceInfo) {
                 res.send(priceInfo);
